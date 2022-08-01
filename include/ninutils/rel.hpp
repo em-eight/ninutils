@@ -208,14 +208,17 @@ class Rel {
 public:
     // Raw data of REL file
     RelHeader hdr;
-    std::vector<RelSection> secs;
+    std::vector<RelSection> secs_raw;
     std::vector<RelImpRaw> imps_raw;
     std::vector<RelRelocRaw> rels_raw;
 
     // More manageable representation of REL data
+    std::vector<RelSection> secs;
     std::vector<RelImp> imps;
     std::vector<RelReloc> rels;
     Rel(uint8_t* rel);
-    std::ostream& printRaw(std::ostream& os, bool print_relocs=false) const;
-    std::ostream& print(std::ostream& os, bool print_relocs=false) const;
+    std::ostream& printRaw(std::ostream& os, bool print_relocs=false, bool p_hdr=true,
+        bool p_secs=false, bool p_imps=false) const;
+    std::ostream& print(std::ostream& os, bool print_relocs=false, bool p_hdr=true,
+        bool p_secs=false, bool p_imps=false) const;
 };

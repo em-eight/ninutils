@@ -76,9 +76,14 @@ RelImpRaw::RelImpRaw(uint8_t* imp) {
     offset = readbe32(imp + RELIMP_OFFSET_OFF);
 }
 
-std::ostream& operator<<(std::ostream& os, const RelImpRaw& relimp)
-{
+std::ostream& operator<<(std::ostream& os, const RelImpRaw& relimp) {
     os << DEC_FMT(relimp.module_id)  << "\t\t" << HEX_FMT(relimp.offset) << "\n";
+    return os;
+}
+
+std::ostream& operator<<(std::ostream& os, const RelImp& relimp) {
+    os << DEC_FMT(relimp.module_id)  << "\t\t" << DEC_FMT(relimp.index) << "\t\t"
+        << DEC_FMT(relimp.count) << "\n";
     return os;
 }
 
@@ -147,9 +152,11 @@ std::ostream& RelReloc::print(std::ostream& os) const {
 }
 
 Rel::Rel(uint8_t* rel) : hdr(rel) {
-    secs.reserve(hdr.numSections);
+    secs_raw.reserve(hdr.numSections);
     for (int i = 0; i < hdr.numSections; i++) {
-        secs.emplace_back(RelSection(rel + hdr.sectionInfoOffset + i*REL_SECTION_INFO_SIZE));
+        RelSection sec(rel + hdr.sectionInfoOffset + i*REL_SECTION_INFO_SIZE);
+        secs_raw.emplace_back(sec);
+        if (sec.size > 0) secs.emplace_back(sec);
     }
 
     uint32_t numImps = hdr.impSize / REL_IMP_SIZE;
@@ -195,18 +202,23 @@ Rel::Rel(uint8_t* rel) : hdr(rel) {
     rels.shrink_to_fit();
 }
 
-std::ostream& Rel::printRaw(std::ostream& os, bool print_relocs) const {
-    os << hdr;
+std::ostream& Rel::printRaw(std::ostream& os, bool print_relocs, bool p_hdr, bool p_secs, bool p_imps) const {
+    if (p_hdr)
+        os << hdr;
 
-    os << "\nSections:\n";
-    os << WIDTH("Offset", 12) << WIDTH("Unknown",10) << WIDTH("Executable",12) <<  WIDTH("Size",12) << "\n";
-    for (const RelSection& sec : secs)
-        os << sec;
+    if (p_secs) {
+        os << "\nSections:\n";
+        os << WIDTH("Offset", 12) << WIDTH("Unknown",10) << WIDTH("Executable",12) <<  WIDTH("Size",12) << "\n";
+        for (const RelSection& sec : secs_raw)
+            os << sec;
+    }
 
-    os << "\nImps:\n";
-    os << "Module ID\tOffset\n";
-    for (const RelImpRaw& imp : imps_raw)
-        os << imp;
+    if (p_imps) {
+        os << "\nImps:\n";
+        os << "Module ID\tOffset\n";
+        for (const RelImpRaw& imp : imps_raw)
+            os << imp;
+    }
     
     if (print_relocs) {
         os << "\nRelocations:\n";
@@ -217,20 +229,26 @@ std::ostream& Rel::printRaw(std::ostream& os, bool print_relocs) const {
     return os;
 }
 
-std::ostream& Rel::print(std::ostream& os, bool print_relocs) const {
-    os << hdr;
+std::ostream& Rel::print(std::ostream& os, bool p_relocs, bool p_hdr, bool p_secs, bool p_imps) const {
+    if (p_hdr)
+        os << hdr;
 
-    os << "\nSections:\n";
-    os << WIDTH("Offset", 12) << WIDTH("Unknown",10) << WIDTH("Executable",12) <<  WIDTH("Size",12) << "\n";
-    for (const RelSection& sec : secs)
-        os << sec;
+    if (p_secs) {
+        os << "\nSections:\n";
+        os << WIDTH("Offset", 12) << WIDTH("Unknown",10) << WIDTH("Executable",12) <<  WIDTH("Size",12) << "\n";
+        for (const RelSection& sec : secs) {
+            os << sec;
+        }
+    }
 
-    os << "\nImps:\n";
-    os << "Module ID\tOffset\n";
-    for (const RelImpRaw& imp : imps_raw)
-        os << imp;
+    if (p_imps) {
+        os << "\nImps:\n";
+        os << "Module ID\tIndex\t\tCount\n";
+        for (const RelImp& imp : imps)
+            os << imp;
+    }
     
-    if (print_relocs) {
+    if (p_relocs) {
         os << "\nRelocations:\n";
         os << "dst sec\tdst off\ttype\tmodule ID\tsrc sec\tsrc off\n";
         for (const RelReloc& rel : rels)
