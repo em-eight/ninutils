@@ -126,12 +126,35 @@ public:
 class RelImpRaw {
 public:
     int32_t module_id;
+    /**
+     * @brief Offset of relocation list from start of REL
+     */
     uint32_t offset;
 
     RelImpRaw(uint8_t* rel);
     friend std::ostream& operator<<(std::ostream& os, const RelImpRaw& ri);
 };
 
+class RelImp {
+public:
+    int32_t module_id;
+    /**
+     * @brief Index in Rel#rels of start of relocations of module with RelImp#module_id
+     */
+    uint32_t index;
+    /**
+     * @brief Number of relocations of module with RelImp#module_id
+     */
+    uint32_t count;
+
+    RelImp(int32_t module_id, uint32_t index, uint32_t count) : 
+        module_id(module_id), index(index), count(count) {}
+    friend std::ostream& operator<<(std::ostream& os, const RelImpRaw& ri);
+};
+
+/**
+ * @brief Raw relocation data entry as read from the file
+ */
 class RelRelocRaw {
 public:
     uint16_t offset;
@@ -143,13 +166,56 @@ public:
     friend std::ostream& operator<<(std::ostream& os, const RelRelocRaw& rr);
 };
 
+/**
+ * @brief Relocation data entry
+ */
+class RelReloc {
+public:
+    /**
+     * @brief Section index of the relocation
+     */
+    uint8_t section_idx;
+    /**
+     * @brief Offset of relocation from RelReloc#section
+     */
+    uint32_t offset;
+    /**
+     * @brief Type of relocation
+     */
+    uint8_t type;
+
+    /**
+     * @brief Module of address to relocate against
+     */
+    int32_t src_module_id;
+    /**
+     * @brief Section of address to relocate against
+     */
+    uint8_t src_section_idx;
+    /**
+     * @brief Offset of address to relocate against from RelReloc#src_section
+     * 
+     */
+    uint32_t src_offset;
+
+    RelReloc(uint8_t section_idx, uint32_t offset, uint8_t type, int32_t src_module_id, uint8_t src_section_idx,
+        uint32_t src_offset) : section_idx(section_idx), offset(offset), type(type),
+        src_module_id(src_module_id), src_section_idx(src_section_idx), src_offset(src_offset) {}
+    std::ostream& print(std::ostream& os) const;
+};
+
 class Rel {
 public:
+    // Raw data of REL file
     RelHeader hdr;
     std::vector<RelSection> secs;
-    std::vector<RelImpRaw> imps;
-    std::vector<RelRelocRaw> rels;
+    std::vector<RelImpRaw> imps_raw;
+    std::vector<RelRelocRaw> rels_raw;
 
+    // More manageable representation of REL data
+    std::vector<RelImp> imps;
+    std::vector<RelReloc> rels;
     Rel(uint8_t* rel);
-    friend std::ostream& operator<<(std::ostream& os, const Rel& rel);
+    std::ostream& printRaw(std::ostream& os) const;
+    std::ostream& print(std::ostream& os) const;
 };

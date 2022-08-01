@@ -5,8 +5,6 @@
 #include <cstring>
 
 
-
-
 RelHeader::RelHeader(uint8_t* rel) {
     id = readbe32(rel + RELHDR_ID_OFF);
     next = readbe32(rel + RELHDR_NEXT_OFF);
@@ -136,9 +134,15 @@ std::string relocTypeToString(uint8_t type) {
 }
 
 std::ostream& operator<<(std::ostream& os, const RelRelocRaw& relrel) {
-    // TODO: relocation type to string
     os << HEX_FMT(relrel.offset)  << "\t" << relocTypeToString(relrel.type) << "\t"
         << DEC_FMT(NUM(relrel.section)) << "\t" << HEX_FMT(relrel.addend) << "\n";
+    return os;
+}
+
+std::ostream& RelReloc::print(std::ostream& os) const {
+    os << DEC_FMT(NUM(section_idx)) << "\t" << HEX_FMT(offset)  << "\t" << relocTypeToString(type)
+        << "\t" << DEC_FMT(NUM(src_module_id)) << "\t" << DEC_FMT(NUM(src_section_idx)) << "\t" 
+        << HEX_FMT(src_offset) << "\n";
     return os;
 }
 
@@ -149,40 +153,84 @@ Rel::Rel(uint8_t* rel) : hdr(rel) {
     }
 
     uint32_t numImps = hdr.impSize / REL_IMP_SIZE;
+    imps_raw.reserve(numImps);
     imps.reserve(numImps);
     for (int i = 0; i < numImps; i++) {
-        imps.emplace_back(RelImpRaw(rel + hdr.impOffset + i*REL_IMP_SIZE));
+        imps_raw.emplace_back(RelImpRaw(rel + hdr.impOffset + i*REL_IMP_SIZE));
+        // index and count set when parsing relocations
+        imps.emplace_back(RelImp(imps_raw[i].module_id, 0, 0));
     }
 
-    for (int i = 0; i < imps.size(); i++) {
-        uint8_t type = R_PPC_NONE;
+    uint32_t reloc_count = 0;
+    for (int i = 0; i < imps_raw.size(); i++) {
         uint32_t it = 0;
-        while (type != R_RVL_STOP) {
-            RelRelocRaw reloc(rel + imps[i].offset + it);
-            rels.emplace_back(reloc);
-            type = reloc.type;
+
+        uint32_t module_reloc_count = 0;
+        uint32_t section_idx = 0;
+        uint32_t section_offset = 0;
+        imps[i].index = reloc_count;
+        while (true) {
+            RelRelocRaw reloc(rel + imps_raw[i].offset + it);
+            rels_raw.emplace_back(reloc);
+            if (reloc.type == R_RVL_STOP) {
+                break;
+            } else if (reloc.type == R_RVL_SECT) {
+                section_idx = reloc.section;
+                section_offset = 0;
+            } else if (reloc.type == R_PPC_NONE) { //skip
+            } else if (reloc.type == R_RVL_NONE) {
+                section_idx += reloc.offset;
+            } else {
+                rels.emplace_back(RelReloc(section_idx, section_offset, reloc.type,
+                    imps_raw[i].module_id, reloc.section, reloc.addend));
+                module_reloc_count++;
+                section_offset += reloc.offset;
+            }
             it += REL_REL_SIZE;
         }
+        imps[i].count = module_reloc_count;
+        reloc_count += module_reloc_count;
     }
+    rels_raw.shrink_to_fit();
+    rels.shrink_to_fit();
 }
 
-std::ostream& operator<<(std::ostream& os, const Rel& rel)
-{
-    os << rel.hdr;
+std::ostream& Rel::printRaw(std::ostream& os) const {
+    os << hdr;
 
     os << "\nSections:\n";
     os << "Offset\tUnknown Executable Size\n";
-    for (const RelSection& sec : rel.secs)
+    for (const RelSection& sec : secs)
         os << sec;
 
     os << "\nImps:\n";
     os << "Module ID\tOffset\n";
-    for (const RelImpRaw& imp : rel.imps)
+    for (const RelImpRaw& imp : imps_raw)
         os << imp;
     
     os << "\nRelocations:\n";
     os << "Offset\ttype section added\n";
-    for (const RelRelocRaw& rel : rel.rels)
+    for (const RelRelocRaw& rel : rels_raw)
         os << rel;
+    return os;
+}
+
+std::ostream& Rel::print(std::ostream& os) const {
+    os << hdr;
+
+    os << "\nSections:\n";
+    os << "Offset\tUnknown Executable Size\n";
+    for (const RelSection& sec : secs)
+        os << sec;
+
+    os << "\nImps:\n";
+    os << "Module ID\tOffset\n";
+    for (const RelImpRaw& imp : imps_raw)
+        os << imp;
+    
+    os << "\nRelocations:\n";
+    os << "dst section\tdst offset\ttype\tmodule ID\tsrc section\tsrc offset\n";
+    for (const RelReloc& rel : rels)
+        rel.print(os);
     return os;
 }

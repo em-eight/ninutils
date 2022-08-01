@@ -19,7 +19,6 @@ int main(int argc, char** argv) {
         relstrm.read(buffer.data(), size);
 
         Rel rel((uint8_t*) buffer.data());
-        std::cout << rel;
+        rel.print(std::cout);
     }
-
 }
