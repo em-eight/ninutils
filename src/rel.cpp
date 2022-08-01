@@ -32,28 +32,28 @@ RelHeader::RelHeader(uint8_t* rel) {
 
 std::ostream& operator<<(std::ostream& os, const RelHeader& relhdr)
 {
-    os << "ID:\t"                << DEC_FMT(relhdr.id)                << "\n"
-       << "next:\t"              << HEX_FMT(relhdr.next)              << "\n"
-       << "prev:\t"              << HEX_FMT(relhdr.prev)              << "\n"
-       << "numSections:\t"       << DEC_FMT(relhdr.numSections)       << "\n"
-       << "sectionInfoOffset:\t" << HEX_FMT(relhdr.sectionInfoOffset) << "\n"
-       << "nameOffset:\t"        << HEX_FMT(relhdr.nameOffset)        << "\n"
-       << "nameSize:\t"          << DEC_FMT(relhdr.nameSize)          << "\n"
-       << "version:\t"           << DEC_FMT(relhdr.version)           << "\n"
-       << "bssSize:\t"           << HEX_FMT(relhdr.bssSize)           << "\n"
-       << "relOffset:\t"         << HEX_FMT(relhdr.relOffset)         << "\n"
-       << "impOffset:\t"         << HEX_FMT(relhdr.impOffset)         << "\n"
-       << "impSize:\t"           << HEX_FMT(relhdr.impSize)           << "\n"
-       << "prologSection:\t"     << DEC_FMT(NUM(relhdr.prologSection))     << "\n"
-       << "epilogSection:\t"     << DEC_FMT(NUM(relhdr.epilogSection))     << "\n"
-       << "unresolvedSection:\t" << DEC_FMT(NUM(relhdr.unresolvedSection)) << "\n"
-       << "bssSection:\t"        << DEC_FMT(NUM(relhdr.bssSection))        << "\n"
-       << "prolog:\t"            << HEX_FMT(relhdr.prolog)            << "\n"
-       << "epilog:\t"            << HEX_FMT(relhdr.epilog)            << "\n"
-       << "unresolved:\t"        << HEX_FMT(relhdr.unresolved)        << "\n"
-       << "align:\t"             << HEX_FMT(relhdr.align)             << "\n"
-       << "bssAlign:\t"          << HEX_FMT(relhdr.bssAlign)          << "\n"
-       << "fixSize:\t"           << HEX_FMT(relhdr.fixSize)           << "\n";
+    os << WIDTH("ID:", 20)                << DEC_FMT(relhdr.id)                << "\n"
+       << WIDTH("next:", 20)              << HEX_FMT(relhdr.next)              << "\n"
+       << WIDTH("prev:", 20)              << HEX_FMT(relhdr.prev)              << "\n"
+       << WIDTH("numSections:", 20)       << DEC_FMT(relhdr.numSections)       << "\n"
+       << WIDTH("sectionInfoOffset:", 20) << HEX_FMT(relhdr.sectionInfoOffset) << "\n"
+       << WIDTH("nameOffset:", 20)        << HEX_FMT(relhdr.nameOffset)        << "\n"
+       << WIDTH("nameSize:", 20)          << DEC_FMT(relhdr.nameSize)          << "\n"
+       << WIDTH("version:", 20)           << DEC_FMT(relhdr.version)           << "\n"
+       << WIDTH("bssSize:", 20)           << HEX_FMT(relhdr.bssSize)           << "\n"
+       << WIDTH("relOffset:", 20)         << HEX_FMT(relhdr.relOffset)         << "\n"
+       << WIDTH("impOffset:", 20)         << HEX_FMT(relhdr.impOffset)         << "\n"
+       << WIDTH("impSize:", 20)           << HEX_FMT(relhdr.impSize)           << "\n"
+       << WIDTH("prologSection:", 20)     << DEC_FMT(NUM(relhdr.prologSection))     << "\n"
+       << WIDTH("epilogSection:", 20)     << DEC_FMT(NUM(relhdr.epilogSection))     << "\n"
+       << WIDTH("unresolvedSection:", 20) << DEC_FMT(NUM(relhdr.unresolvedSection)) << "\n"
+       << WIDTH("bssSection:", 20)        << DEC_FMT(NUM(relhdr.bssSection))        << "\n"
+       << WIDTH("prolog:", 20)            << HEX_FMT(relhdr.prolog)            << "\n"
+       << WIDTH("epilog:", 20)            << HEX_FMT(relhdr.epilog)            << "\n"
+       << WIDTH("unresolved:", 20)        << HEX_FMT(relhdr.unresolved)        << "\n"
+       << WIDTH("align:", 20)             << HEX_FMT(relhdr.align)             << "\n"
+       << WIDTH("bssAlign:", 20)          << HEX_FMT(relhdr.bssAlign)          << "\n"
+       << WIDTH("fixSize:", 20)           << HEX_FMT(relhdr.fixSize)           << "\n";
     return os;
 }
 
@@ -66,8 +66,8 @@ RelSection::RelSection(uint8_t* sec) {
 
 std::ostream& operator<<(std::ostream& os, const RelSection& relsec)
 {
-    os << HEX_FMT(relsec.offset)  << "\t" << BOOL_FMT(relsec.unknown) << "\t" << BOOL_FMT(NUM(relsec.exec)) 
-        << "\t" << HEX_FMT(relsec.size) << "\n";
+    os << HEX_FMTW(relsec.offset, 12)  << BOOL_FMTW(relsec.unknown, 10)
+        << BOOL_FMTW(NUM(relsec.exec), 12) << HEX_FMTW(relsec.size, 12) << "\n";
     return os;
 }
 
@@ -134,15 +134,15 @@ std::string relocTypeToString(uint8_t type) {
 }
 
 std::ostream& operator<<(std::ostream& os, const RelRelocRaw& relrel) {
-    os << HEX_FMT(relrel.offset)  << "\t" << relocTypeToString(relrel.type) << "\t"
-        << DEC_FMT(NUM(relrel.section)) << "\t" << HEX_FMT(relrel.addend) << "\n";
+    os << HEX_FMTW(relrel.offset, 12)  << WIDTH(relocTypeToString(relrel.type), 17)
+        << DEC_FMTW(NUM(relrel.section), 9) << "\t" << HEX_FMTW(relrel.addend, 12) << "\n";
     return os;
 }
 
 std::ostream& RelReloc::print(std::ostream& os) const {
-    os << DEC_FMT(NUM(section_idx)) << "\t" << HEX_FMT(offset)  << "\t" << relocTypeToString(type)
-        << "\t" << DEC_FMT(NUM(src_module_id)) << "\t" << DEC_FMT(NUM(src_section_idx)) << "\t" 
-        << HEX_FMT(src_offset) << "\n";
+    os << DEC_FMTW(NUM(section_idx), 9) << HEX_FMTW(offset, 12) << WIDTH(relocTypeToString(type), 17)
+        << DEC_FMTW(NUM(src_module_id), 11) << "\t" << DEC_FMTW(NUM(src_section_idx), 9) << "\t" 
+        << HEX_FMTW(src_offset, 12) << "\n";
     return os;
 }
 
@@ -195,11 +195,11 @@ Rel::Rel(uint8_t* rel) : hdr(rel) {
     rels.shrink_to_fit();
 }
 
-std::ostream& Rel::printRaw(std::ostream& os) const {
+std::ostream& Rel::printRaw(std::ostream& os, bool print_relocs) const {
     os << hdr;
 
     os << "\nSections:\n";
-    os << "Offset\tUnknown Executable Size\n";
+    os << WIDTH("Offset", 12) << WIDTH("Unknown",10) << WIDTH("Executable",12) <<  WIDTH("Size",12) << "\n";
     for (const RelSection& sec : secs)
         os << sec;
 
@@ -208,18 +208,20 @@ std::ostream& Rel::printRaw(std::ostream& os) const {
     for (const RelImpRaw& imp : imps_raw)
         os << imp;
     
-    os << "\nRelocations:\n";
-    os << "Offset\ttype section added\n";
-    for (const RelRelocRaw& rel : rels_raw)
-        os << rel;
+    if (print_relocs) {
+        os << "\nRelocations:\n";
+        os << "Offset\ttype section added\n";
+        for (const RelRelocRaw& rel : rels_raw)
+            os << rel;
+    }
     return os;
 }
 
-std::ostream& Rel::print(std::ostream& os) const {
+std::ostream& Rel::print(std::ostream& os, bool print_relocs) const {
     os << hdr;
 
     os << "\nSections:\n";
-    os << "Offset\tUnknown Executable Size\n";
+    os << WIDTH("Offset", 12) << WIDTH("Unknown",10) << WIDTH("Executable",12) <<  WIDTH("Size",12) << "\n";
     for (const RelSection& sec : secs)
         os << sec;
 
@@ -228,9 +230,11 @@ std::ostream& Rel::print(std::ostream& os) const {
     for (const RelImpRaw& imp : imps_raw)
         os << imp;
     
-    os << "\nRelocations:\n";
-    os << "dst section\tdst offset\ttype\tmodule ID\tsrc section\tsrc offset\n";
-    for (const RelReloc& rel : rels)
-        rel.print(os);
+    if (print_relocs) {
+        os << "\nRelocations:\n";
+        os << "dst sec\tdst off\ttype\tmodule ID\tsrc sec\tsrc off\n";
+        for (const RelReloc& rel : rels)
+            rel.print(os);
+    }
     return os;
 }

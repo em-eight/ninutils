@@ -216,6 +216,6 @@ public:
     std::vector<RelImp> imps;
     std::vector<RelReloc> rels;
     Rel(uint8_t* rel);
-    std::ostream& printRaw(std::ostream& os) const;
-    std::ostream& print(std::ostream& os) const;
+    std::ostream& printRaw(std::ostream& os, bool print_relocs=false) const;
+    std::ostream& print(std::ostream& os, bool print_relocs=false) const;
 };
