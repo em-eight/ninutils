@@ -1,6 +1,7 @@
 
 #include "ninutils/rel.hpp"
 #include "ninutils/utils.hpp"
+#include "ninutils/symbols.hpp"
 
 #include <iostream>
 #include <fstream>
@@ -11,12 +12,12 @@
 
 class ReadRelArgs {
 public:
-    bool raw = false, hdr = false, secs = false, rels = false, imps = false;
+    bool raw = false, hdr = false, secs = false, rels = false, imps = false, syms = false;
     std::string relPath;
 
     int readArgs(int argc, char** argv) {
         int c;
-        while ((c = getopt (argc, argv, "whSri")) != -1) {
+        while ((c = getopt (argc, argv, "whSris")) != -1) {
             switch (c) {
             case 'w':
                 raw = true;
@@ -33,6 +34,9 @@ public:
             case 'i':
                 imps = true;
                 break;
+            case 's':
+                syms = true;
+                break;
             default:
                 return -2;
             }
@@ -43,7 +47,7 @@ public:
         } else {
             return -1;
         }
-        if (!rels && !secs && !hdr && !imps)
+        if (!rels && !secs && !hdr && !imps && !syms)
             return -3;
         return 0;
     }
@@ -56,6 +60,7 @@ public:
             << WIDTH("\t-S", 5) << "Print REL section table\n"
             << WIDTH("\t-i", 5) << "Print REL imp table\n"
             << WIDTH("\t-r", 5) << "Print REL relocations\n"
+            << WIDTH("\t-s", 5) << "Print REL inferred symbols\n"
             << WIDTH("\t-w", 5) << "Print in raw format, aka as is from the file\n";
     }
 };
@@ -82,6 +87,11 @@ int main(int argc, char** argv) {
             rel.printRaw(std::cout, args.rels, args.hdr, args.secs, args.imps);
         } else {
             rel.print(std::cout, args.rels, args.hdr, args.secs, args.imps);
+        }
+
+        if (args.syms) {
+            SymbolTable symtab(rel);
+            symtab.print(std::cout);
         }
     }
 }
