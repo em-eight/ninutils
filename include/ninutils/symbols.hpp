@@ -22,8 +22,8 @@ public:
     std::string name;
 
     Symbol() = default;
-    Symbol(int32_t module_id, uint8_t section_idx, uint32_t offset) : module_id(module_id),
-        section_idx(section_idx), offset(offset) {}
+    Symbol(int32_t module_id, uint8_t section_idx, uint32_t offset, uint32_t vma = 0x0) :
+        module_id(module_id), section_idx(section_idx), offset(offset), vma(vma) {}
     Symbol(int32_t module_id, uint32_t vma) : module_id(module_id), vma(vma) {}
     void genName();
     bool operator==(const Symbol& other) const;

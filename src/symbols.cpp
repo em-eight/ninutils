@@ -18,12 +18,13 @@ void Symbol::genName() {
 
 std::ostream& Symbol::print(std::ostream& os) const {
     // TODO: Support providing load address to calculate VMAs of REL symbols
-    if (module_id == 0)
+    if (vma != 0x0)
         os << DEC_FMTW(module_id, 12) << DEC_FMTW(NUM(section_idx), 9) << HEX_FMTW(offset, 12)
             << HEX_FMTW(vma, 12) << WIDTH(name, 12) << "\n";
-    else
+    else {
         os << DEC_FMTW(module_id, 12) << DEC_FMTW(NUM(section_idx), 9) << HEX_FMTW(offset, 12)
             << HEX_FMTW(vma, 12) << WIDTH("-", 12) << "\n";
+    }
 
     return os;
 }
@@ -33,7 +34,7 @@ bool Symbol::operator==(const Symbol& other) const {
 
     if (this->module_id == 0) { // DOL symbol
         return this->vma == other.vma;
-    } else { // REL symbol
+    } else {                    // REL symbol
         return this->section_idx == other.section_idx && this->offset == other.offset;
     }
 }
@@ -82,7 +83,11 @@ void SymbolTable::inferSyms(const std::vector<Rel>& rels, const std::vector<int3
                 if (imp.module_id == 0) { // DOL symbol
                     sym = Symbol(imp.module_id, reloc.src_offset);
                 } else { // REL symbol
-                    sym = Symbol(imp.module_id, reloc.section_idx, reloc.src_offset);
+                    if (rel.load_addr != 0x0) {
+                        uint32_t sym_vma = rel.load_addr + rel.secs_raw[reloc.section_idx].offset + reloc.src_offset;
+                        sym = Symbol(imp.module_id, reloc.section_idx, reloc.src_offset, sym_vma);
+                    } else
+                        sym = Symbol(imp.module_id, reloc.section_idx, reloc.src_offset);
                 }
 
                 const auto& [it, inserted] = added_symbols.emplace(sym);

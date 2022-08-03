@@ -6,6 +6,9 @@
 #include <string>
 #include <fstream>
 #include <vector>
+#include <optional>
+
+#include "presets.hpp"
 
 #define RELHDR_ID_OFF 0x00
 #define RELHDR_ID_SIZE 0x04
@@ -217,7 +220,7 @@ public:
     std::vector<RelImp> imps;
     std::vector<RelReloc> rels;
     uint32_t load_addr;
-    Rel(uint8_t* rel, uint32_t load_addr = 0x0);
+    Rel(uint8_t* rel, std::optional<ExtraInfo> extra_info = std::nullopt);
     std::ostream& printRaw(std::ostream& os, bool print_relocs=false, bool p_hdr=true,
         bool p_secs=false, bool p_imps=false) const;
     std::ostream& print(std::ostream& os, bool print_relocs=false, bool p_hdr=true,

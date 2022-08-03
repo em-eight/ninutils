@@ -2,6 +2,7 @@
 #include "ninutils/rel.hpp"
 #include "ninutils/utils.hpp"
 #include "ninutils/symbols.hpp"
+#include "ninutils/presets.hpp"
 
 #include <iostream>
 #include <fstream>
@@ -14,10 +15,11 @@ class ReadRelArgs {
 public:
     bool raw = false, hdr = false, secs = false, rels = false, imps = false, syms = false;
     std::string relPath;
+    std::string preset = "";
 
     int readArgs(int argc, char** argv) {
         int c;
-        while ((c = getopt (argc, argv, "whSris")) != -1) {
+        while ((c = getopt (argc, argv, "whSrisp:")) != -1) {
             switch (c) {
             case 'w':
                 raw = true;
@@ -36,6 +38,9 @@ public:
                 break;
             case 's':
                 syms = true;
+                break;
+            case 'p':
+                preset = std::string(optarg);
                 break;
             default:
                 return -2;
@@ -61,7 +66,8 @@ public:
             << WIDTH("\t-i", 5) << "Print REL imp table\n"
             << WIDTH("\t-r", 5) << "Print REL relocations\n"
             << WIDTH("\t-s", 5) << "Print REL inferred symbols\n"
-            << WIDTH("\t-w", 5) << "Print in raw format, aka as is from the file\n";
+            << WIDTH("\t-w", 5) << "Print in raw format, aka as is from the file\n"
+            << WIDTH("\t-p", 5) << "Specify a preset to get more game-specific info\n";
     }
 };
 
@@ -82,7 +88,9 @@ int main(int argc, char** argv) {
         std::vector<char> buffer(size);
         relstrm.read(buffer.data(), size);
 
-        Rel rel((uint8_t*) buffer.data());
+        ExtraInfo extra_info(args.preset);
+        Rel rel((uint8_t*) buffer.data(),
+            extra_info.description.empty() ? std::nullopt : std::optional<ExtraInfo>(extra_info));
         if (args.raw) {
             rel.printRaw(std::cout, args.rels, args.hdr, args.secs, args.imps);
         } else {

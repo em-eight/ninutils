@@ -151,7 +151,7 @@ std::ostream& RelReloc::print(std::ostream& os) const {
     return os;
 }
 
-Rel::Rel(uint8_t* rel, uint32_t load_addr) : hdr(rel), load_addr(load_addr) {
+Rel::Rel(uint8_t* rel, std::optional<ExtraInfo> extra_info) : hdr(rel) {
     secs_raw.reserve(hdr.numSections);
     for (int i = 0; i < hdr.numSections; i++) {
         RelSection sec(rel + hdr.sectionInfoOffset + i*REL_SECTION_INFO_SIZE);
@@ -200,6 +200,12 @@ Rel::Rel(uint8_t* rel, uint32_t load_addr) : hdr(rel), load_addr(load_addr) {
     }
     rels_raw.shrink_to_fit();
     rels.shrink_to_fit();
+
+    // Get extra info from ExtraInfo if provided
+    if (extra_info.has_value() && extra_info->modules.count(hdr.id) > 0)
+            load_addr = extra_info->modules[hdr.id].load_address;
+    else load_addr = 0x0;
+    
 }
 
 std::ostream& Rel::printRaw(std::ostream& os, bool print_relocs, bool p_hdr, bool p_secs, bool p_imps) const {
