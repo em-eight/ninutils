@@ -1,5 +1,5 @@
 
-#include "ninutils/presets.hpp"
+#include "ninutils/extra_info.hpp"
 
 ExtraInfo::ExtraInfo(std::string preset) {
     if (preset == "mkw-pal") {

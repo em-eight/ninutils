@@ -59,13 +59,17 @@ Usage: readrel <option(s)> rel_file
         -s  Print REL inferred symbols
         -w  Print in raw format, aka as is from the file
 ```
+## External information
+Aside from the binaries themselves, external information about the context that the binaries are loaded
+can be provided with the class `ExtraInfo`, to enable functionality that requires them.
+The library also contains presets of the objects that can be passed to the CLI tools that can 
+enrich/extend their output.
 ## Documentation
 Currently in progress. The header files are relatively small for now and contain plenty of comments.
 
 ## Roadmap
 - Support for providing symbol names.
 - `reldump`/`doldump` tools.
-- Support providing presets on game-specific info (e.g. REL load address)
 - Disassembly and `disas` CLI tool.
 - python bindings
 

@@ -5,7 +5,7 @@ project(ninutils VERSION 1.0)
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_library(dolrel SHARED src/rel.cpp src/symbols.cpp src/dol.cpp src/presets.cpp)
+add_library(dolrel SHARED src/rel.cpp src/symbols.cpp src/dol.cpp src/extra_info.cpp)
 target_include_directories(dolrel PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>  # <prefix>/include
