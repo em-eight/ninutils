@@ -216,7 +216,8 @@ public:
     std::vector<RelSection> secs;
     std::vector<RelImp> imps;
     std::vector<RelReloc> rels;
-    Rel(uint8_t* rel);
+    uint32_t load_addr;
+    Rel(uint8_t* rel, uint32_t load_addr = 0x0);
     std::ostream& printRaw(std::ostream& os, bool print_relocs=false, bool p_hdr=true,
         bool p_secs=false, bool p_imps=false) const;
     std::ostream& print(std::ostream& os, bool print_relocs=false, bool p_hdr=true,

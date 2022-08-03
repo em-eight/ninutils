@@ -151,7 +151,7 @@ std::ostream& RelReloc::print(std::ostream& os) const {
     return os;
 }
 
-Rel::Rel(uint8_t* rel) : hdr(rel) {
+Rel::Rel(uint8_t* rel, uint32_t load_addr) : hdr(rel), load_addr(load_addr) {
     secs_raw.reserve(hdr.numSections);
     for (int i = 0; i < hdr.numSections; i++) {
         RelSection sec(rel + hdr.sectionInfoOffset + i*REL_SECTION_INFO_SIZE);
