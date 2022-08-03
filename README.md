@@ -15,8 +15,7 @@ and get a good idea on how to achieve what they want.
  if you know any!)
 - have a CLI that resembles the generally familiar binutils.
 - be very fast and make close to zero performance compromises. This prevents people from considering 
-their own tools for performance reasons, and subtly puts pressure on projects using less performant 
-tools to migrate.
+their own tools for performance reasons.
 
 ## Building/Installation
 ```
@@ -29,13 +28,23 @@ make install
 You may need to adjust your PATH/LD_LIBRARY_PATH to the path of the installed executables/libraries.
 
 ## Tools/Libraries
-### `librel`
-C++ library for manipulating REL files. Quickstart:
+### `libdolrel`
+C++ library for manipulating DOL/REL files. Quickstart:
 ```c++
+Dol dol(dolpath);
 Rel rel(relpath);
 SymbolTable symtab(rel);
+dol.print(std::out);                         // Print DOL info to std::out
 rel.print(std::out, true, true, true, true); // Print all REL info to std::out
 symtab.print(std::out);                      // Print symbols inferred from REL relocs to std::out
+```
+### `readdol`
+CLI introspection tool for DOLs. Inspired by `readelf`.
+```
+Usage: readdol <option(s)> dol_file
+ Display information about the contents of DOL files
+ Options are:
+        -w  Print in raw format, aka as is from the file
 ```
 ### `readrel`
 CLI introspection tool for RELs. Inspired by `readelf`.
@@ -50,12 +59,10 @@ Usage: readrel <option(s)> rel_file
         -s  Print REL inferred symbols
         -w  Print in raw format, aka as is from the file
 ```
-
 ## Documentation
 Currently in progress. The header files are relatively small for now and contain plenty of comments.
 
 ## Roadmap
-- DOL support.
 - Support for providing symbol names.
 - `reldump`/`doldump` tools.
 - Support providing presets on game-specific info (e.g. REL load address)
