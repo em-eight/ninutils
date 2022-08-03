@@ -5,6 +5,7 @@
 #include <map>
 
 #define MKW_PAL_REL_LOAD_ADDR 0x805102e0
+#define MKW_PAL_REL_BSS_LOAD_ADDR 0x809bd6e0
 
 class ModuleExtraInfo {
 public:
@@ -13,9 +14,14 @@ public:
      * For REL, this is the VMA the start of the header is mapped at. 0x0 is unknown/invalid 
      */
     uint32_t load_address;
+    /**
+     * @brief REL only. The virtual memory address of the .bss section
+     */
+    uint32_t bss_load_address;
 
-    ModuleExtraInfo() : load_address(0x0) {} // default constructor
-    ModuleExtraInfo(uint32_t load_address) : load_address(load_address) {}
+    ModuleExtraInfo() : load_address(0x0), bss_load_address(0x0) {} // default constructor
+    ModuleExtraInfo(uint32_t load_address, uint32_t bss_load_address) 
+        : load_address(load_address), bss_load_address(bss_load_address) {}
 };
 
 class ExtraInfo {

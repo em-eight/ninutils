@@ -178,6 +178,7 @@ Rel::Rel(uint8_t* rel, std::optional<ExtraInfo> extra_info) : hdr(rel) {
         imps[i].index = reloc_count;
         while (true) {
             RelRelocRaw reloc(rel + imps_raw[i].offset + it);
+            //std::cout << reloc;
             rels_raw.emplace_back(reloc);
             if (reloc.type == R_RVL_STOP) {
                 break;
@@ -186,12 +187,13 @@ Rel::Rel(uint8_t* rel, std::optional<ExtraInfo> extra_info) : hdr(rel) {
                 section_offset = 0;
             } else if (reloc.type == R_PPC_NONE) { //skip
             } else if (reloc.type == R_RVL_NONE) {
-                section_idx += reloc.offset;
+                section_offset += reloc.offset;
             } else {
+                section_offset += reloc.offset;
                 rels.emplace_back(RelReloc(section_idx, section_offset, reloc.type,
                     imps_raw[i].module_id, reloc.section, reloc.addend));
+                //std::cout << HEX_FMT(secs_raw[reloc.section].offset + reloc.addend + MKW_PAL_REL_LOAD_ADDR) << std::endl;
                 module_reloc_count++;
-                section_offset += reloc.offset;
             }
             it += REL_REL_SIZE;
         }
@@ -202,9 +204,13 @@ Rel::Rel(uint8_t* rel, std::optional<ExtraInfo> extra_info) : hdr(rel) {
     rels.shrink_to_fit();
 
     // Get extra info from ExtraInfo if provided
-    if (extra_info.has_value() && extra_info->modules.count(hdr.id) > 0)
+    if (extra_info.has_value() && extra_info->modules.count(hdr.id) > 0) {
             load_addr = extra_info->modules[hdr.id].load_address;
-    else load_addr = 0x0;
+            bss_load_addr = extra_info->modules[hdr.id].bss_load_address;
+    } else {
+        load_addr = 0x0;
+        bss_load_addr = 0x0;
+    }
     
 }
 

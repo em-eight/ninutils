@@ -197,7 +197,6 @@ public:
     uint8_t src_section_idx;
     /**
      * @brief Offset of address to relocate against from RelReloc#src_section
-     * 
      */
     uint32_t src_offset;
 
@@ -220,6 +219,7 @@ public:
     std::vector<RelImp> imps;
     std::vector<RelReloc> rels;
     uint32_t load_addr;
+    uint32_t bss_load_addr;
     Rel(uint8_t* rel, std::optional<ExtraInfo> extra_info = std::nullopt);
     std::ostream& printRaw(std::ostream& os, bool print_relocs=false, bool p_hdr=true,
         bool p_secs=false, bool p_imps=false) const;

@@ -82,12 +82,18 @@ void SymbolTable::inferSyms(const std::vector<Rel>& rels, const std::vector<int3
                 Symbol sym;
                 if (imp.module_id == 0) { // DOL symbol
                     sym = Symbol(imp.module_id, reloc.src_offset);
-                } else { // REL symbol
-                    if (rel.load_addr != 0x0) {
-                        uint32_t sym_vma = rel.load_addr + rel.secs_raw[reloc.section_idx].offset + reloc.src_offset;
-                        sym = Symbol(imp.module_id, reloc.section_idx, reloc.src_offset, sym_vma);
+                } else {                  // REL symbol
+                    if (rel.load_addr != 0x0 && rel.bss_load_addr) {
+                        uint32_t sec_off = rel.secs_raw[reloc.src_section_idx].offset;
+                        uint32_t sym_vma;
+                        if (sec_off == 0) { // symbol VMAs of .bss symbols
+                            sym_vma = rel.bss_load_addr + reloc.src_offset;
+                        } else {            // symbol VMAs of non-.bss symbols
+                            sym_vma = rel.load_addr + sec_off + reloc.src_offset;
+                        }
+                        sym = Symbol(imp.module_id, reloc.src_section_idx, reloc.src_offset, sym_vma);
                     } else
-                        sym = Symbol(imp.module_id, reloc.section_idx, reloc.src_offset);
+                        sym = Symbol(imp.module_id, reloc.src_section_idx, reloc.src_offset);
                 }
 
                 const auto& [it, inserted] = added_symbols.emplace(sym);
