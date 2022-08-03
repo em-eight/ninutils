@@ -4,9 +4,6 @@
 #include <cstdint>
 #include <map>
 
-#define MKW_PAL_REL_LOAD_ADDR 0x805102e0
-#define MKW_PAL_REL_BSS_LOAD_ADDR 0x809bd6e0
-
 class ModuleExtraInfo {
 public:
     /**
@@ -36,4 +33,7 @@ public:
      * @param preset Name of the preset
      */
     ExtraInfo(std::string preset);
+    static std::ostream& printPresets(std::ostream& os); 
 };
+
+extern const char* preset_names[];

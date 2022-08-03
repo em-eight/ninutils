@@ -52,18 +52,22 @@ CLI introspection tool for RELs. Inspired by `readelf`.
 Usage: readrel <option(s)> rel_file
  Display information about the contents of REL files
  Options are:
-        -h  Print REL header
-        -S  Print REL section table
-        -i  Print REL imp table
-        -r  Print REL relocations
-        -s  Print REL inferred symbols
-        -w  Print in raw format, aka as is from the file
+        -h           Print REL header
+        -S           Print REL section table
+        -i           Print REL imp table
+        -r           Print REL relocations
+        -s           Print REL inferred symbols
+        -w           Print in raw format, aka as is from the file
+        -p <preset>  Specify a preset to get game-specific info (e.g. VMAs of REL symbols)
+Available presets:
+mkw-pal     Mario Kart Wii PAL
 ```
 ## External information
 Aside from the binaries themselves, external information about the context that the binaries are loaded
 can be provided with the class `ExtraInfo`, to enable functionality that requires them.
 The library also contains presets of the objects that can be passed to the CLI tools that can 
-enrich/extend their output.
+enrich/extend their output. To add a preset for your game of interest to this library, simply add an
+ `else if` statement to the ExtraInfo constructor at `src/extra_info.cpp`
 ## Documentation
 Currently in progress. The header files are relatively small for now and contain plenty of comments.
 

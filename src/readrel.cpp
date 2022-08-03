@@ -61,13 +61,15 @@ public:
         os << "Usage: readrel <option(s)> rel_file\n"
             " Display information about the contents of REL files\n"
             " Options are:\n"
-            << WIDTH("\t-h", 5) << "Print REL header\n"
-            << WIDTH("\t-S", 5) << "Print REL section table\n"
-            << WIDTH("\t-i", 5) << "Print REL imp table\n"
-            << WIDTH("\t-r", 5) << "Print REL relocations\n"
-            << WIDTH("\t-s", 5) << "Print REL inferred symbols\n"
-            << WIDTH("\t-w", 5) << "Print in raw format, aka as is from the file\n"
-            << WIDTH("\t-p", 5) << "Specify a preset to get more game-specific info\n";
+            << WIDTH("\t-h", 14) << "Print REL header\n"
+            << WIDTH("\t-S", 14) << "Print REL section table\n"
+            << WIDTH("\t-i", 14) << "Print REL imp table\n"
+            << WIDTH("\t-r", 14) << "Print REL relocations\n"
+            << WIDTH("\t-s", 14) << "Print REL inferred symbols\n"
+            << WIDTH("\t-w", 14) << "Print in raw format, aka as is from the file\n"
+            << WIDTH("\t-p <preset>", 14) << "Specify a preset to get game-specific info (e.g. VMAs of REL symbols)\n";
+
+        ExtraInfo::printPresets(os);
     }
 };
 
