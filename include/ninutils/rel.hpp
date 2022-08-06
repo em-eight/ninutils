@@ -120,9 +120,11 @@ public:
     uint32_t offset;
     uint8_t unknown;
     uint8_t exec;
-    uint32_t size;
+    uint32_t length;
+    uint8_t* data;
 
-    RelSection(uint8_t* rel);
+    RelSection(uint8_t* rel, uint8_t* sec);
+    ~RelSection();
     friend std::ostream& operator<<(std::ostream& os, const RelSection& rs);
 };
 

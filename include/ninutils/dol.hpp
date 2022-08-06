@@ -38,8 +38,10 @@ public:
     uint32_t offset;
     uint32_t address;
     uint32_t length;
-    DolSection(uint32_t offset, uint32_t address, uint32_t length) : offset(offset), address(address),
-        length(length) {}
+    uint8_t* data;
+
+    DolSection(uint8_t* dol, uint32_t offset, uint32_t address, uint32_t length);
+    ~DolSection();
     std::ostream& print(std::ostream& os) const;
 };
 

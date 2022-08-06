@@ -57,17 +57,24 @@ std::ostream& operator<<(std::ostream& os, const RelHeader& relhdr)
     return os;
 }
 
-RelSection::RelSection(uint8_t* sec) {
+RelSection::RelSection(uint8_t* rel, uint8_t* sec) {
     offset = 0xfffffffc & readbe32(sec);
     unknown = (readbe32(sec) >> 1) & 0x1;
     exec = (readbe32(sec) >> 0) & 0x1;
-    size = readbe32(sec + 0x4);
+    length = readbe32(sec + 0x4);
+
+    data = (uint8_t*) malloc(length);
+    memcpy(data, rel + offset, length);
+}
+
+RelSection::~RelSection() {
+    free(data);
 }
 
 std::ostream& operator<<(std::ostream& os, const RelSection& relsec)
 {
     os << HEX_FMTW(relsec.offset, 12)  << BOOL_FMTW(relsec.unknown, 10)
-        << BOOL_FMTW(NUM(relsec.exec), 12) << HEX_FMTW(relsec.size, 12) << "\n";
+        << BOOL_FMTW(NUM(relsec.exec), 12) << HEX_FMTW(relsec.length, 12) << "\n";
     return os;
 }
 
@@ -154,9 +161,9 @@ std::ostream& RelReloc::print(std::ostream& os) const {
 Rel::Rel(uint8_t* rel, std::optional<ExtraInfo> extra_info) : hdr(rel) {
     secs_raw.reserve(hdr.numSections);
     for (int i = 0; i < hdr.numSections; i++) {
-        RelSection sec(rel + hdr.sectionInfoOffset + i*REL_SECTION_INFO_SIZE);
+        RelSection sec(rel, rel + hdr.sectionInfoOffset + i*REL_SECTION_INFO_SIZE);
         secs_raw.emplace_back(sec);
-        if (sec.size > 0) secs.emplace_back(sec);
+        if (sec.length > 0) secs.emplace_back(sec);
     }
 
     uint32_t numImps = hdr.impSize / REL_IMP_SIZE;

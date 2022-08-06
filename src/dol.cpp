@@ -14,11 +14,21 @@ DolHeaderRaw::DolHeaderRaw(uint8_t* dol) {
     entry_point = readbe32(dol + DOLHDR_ENTRYPOINT_OFF);
 }
 
+DolSection::DolSection(uint8_t* dol, uint32_t offset, uint32_t address, uint32_t length) : offset(offset),
+    address(address), length(length) {
+    data = (uint8_t*) malloc(length);
+    memcpy(data, dol + offset, length);
+}
+
+DolSection::~DolSection() {
+    free(data);
+}
+
 Dol::Dol(uint8_t* dol) : hdr(dol) {
     secs.reserve(DOL_MAX_SECTION_COUNT);
     for (int i = 0; i < DOL_MAX_SECTION_COUNT; i++) {
         if (hdr.offsets[i] != 0 && hdr.addresses[i] != 0 && hdr.lengths[i] != 0) {
-            secs.emplace_back(DolSection(hdr.offsets[i], hdr.addresses[i], hdr.lengths[i]));
+            secs.emplace_back(DolSection(dol, hdr.offsets[i], hdr.addresses[i], hdr.lengths[i]));
         }
     }
     secs.shrink_to_fit();
