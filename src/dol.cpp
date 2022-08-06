@@ -2,6 +2,7 @@
 #include "ninutils/dol.hpp"
 #include "ninutils/utils.hpp"
 
+
 DolHeaderRaw::DolHeaderRaw(uint8_t* dol) {
     for (int i = 0; i < DOL_MAX_SECTION_COUNT; i++) {
         offsets[i] = readbe32(dol + DOLHDR_OFFSETS_OFF + i*DOLHDR_OFFSET_SIZE);
@@ -21,14 +22,15 @@ DolSection::DolSection(uint8_t* dol, uint32_t offset, uint32_t address, uint32_t
 }
 
 DolSection::~DolSection() {
-    free(data);
+    if (data != nullptr)
+        free(data);
 }
 
 Dol::Dol(uint8_t* dol) : hdr(dol) {
     secs.reserve(DOL_MAX_SECTION_COUNT);
     for (int i = 0; i < DOL_MAX_SECTION_COUNT; i++) {
         if (hdr.offsets[i] != 0 && hdr.addresses[i] != 0 && hdr.lengths[i] != 0) {
-            secs.emplace_back(DolSection(dol, hdr.offsets[i], hdr.addresses[i], hdr.lengths[i]));
+            secs.emplace_back(dol, hdr.offsets[i], hdr.addresses[i], hdr.lengths[i]);
         }
     }
     secs.shrink_to_fit();

@@ -121,10 +121,18 @@ public:
     uint8_t unknown;
     uint8_t exec;
     uint32_t length;
-    uint8_t* data;
+    uint8_t* data = nullptr;
 
     RelSection(uint8_t* rel, uint8_t* sec);
     ~RelSection();
+    RelSection(const RelSection& other) : offset(other.offset), unknown(other.unknown),
+        exec(other.exec), length(other.length) {
+        data = (uint8_t*) malloc(length);
+    }
+    RelSection(RelSection&& other) noexcept : offset(other.offset), unknown(other.unknown),
+        exec(other.exec), length(other.length), data(other.data) {
+        other.data = nullptr;
+    }
     friend std::ostream& operator<<(std::ostream& os, const RelSection& rs);
 };
 

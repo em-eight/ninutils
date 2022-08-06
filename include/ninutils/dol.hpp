@@ -38,10 +38,14 @@ public:
     uint32_t offset;
     uint32_t address;
     uint32_t length;
-    uint8_t* data;
+    uint8_t* data = nullptr;
 
     DolSection(uint8_t* dol, uint32_t offset, uint32_t address, uint32_t length);
     ~DolSection();
+    DolSection(DolSection&& other) noexcept : offset(other.offset), address(other.address),
+        length(other.length), data(other.data) {
+        other.data = nullptr;
+    }
     std::ostream& print(std::ostream& os) const;
 };
 
@@ -52,6 +56,7 @@ public:
 
     // More manageable representation of DOL data
     std::vector<DolSection> secs;
+
     Dol(uint8_t* dol);
     std::ostream& print(std::ostream& os) const;
 };

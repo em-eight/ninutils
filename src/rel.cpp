@@ -68,7 +68,8 @@ RelSection::RelSection(uint8_t* rel, uint8_t* sec) {
 }
 
 RelSection::~RelSection() {
-    free(data);
+    if (data)
+        free(data);
 }
 
 std::ostream& operator<<(std::ostream& os, const RelSection& relsec)
@@ -170,9 +171,9 @@ Rel::Rel(uint8_t* rel, std::optional<ExtraInfo> extra_info) : hdr(rel) {
     imps_raw.reserve(numImps);
     imps.reserve(numImps);
     for (int i = 0; i < numImps; i++) {
-        imps_raw.emplace_back(RelImpRaw(rel + hdr.impOffset + i*REL_IMP_SIZE));
+        imps_raw.emplace_back(rel + hdr.impOffset + i*REL_IMP_SIZE);
         // index and count set when parsing relocations
-        imps.emplace_back(RelImp(imps_raw[i].module_id, 0, 0));
+        imps.emplace_back(imps_raw[i].module_id, 0, 0);
     }
 
     uint32_t reloc_count = 0;
