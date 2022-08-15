@@ -75,12 +75,12 @@
 #define R_PPC_ADDR16_HI 5
 #define R_PPC_ADDR16_HA 6
 #define R_PPC_ADDR14 7
-#define R_PPC_ADDR14_8 8
-#define R_PPC_ADDR14_9 9
+#define R_PPC_ADDR14_BRTAKEN 8
+#define R_PPC_ADDR14_BRNTAKEN 9
 #define R_PPC_REL24 10
 #define R_PPC_REL14 11
-#define R_PPC_REL14_12 12
-#define R_PPC_REL14_13 13
+#define R_PPC_REL14_BRTAKEN 12
+#define R_PPC_REL14_BRNTAKEN 13
 #define R_RVL_NONE 201
 #define R_RVL_SECT 202
 #define R_RVL_STOP 203

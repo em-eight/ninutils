@@ -3,7 +3,12 @@
 #include <vector>
 #include <array>
 #include <cstdint>
+#include <optional>
 
+#include "extra_info.hpp"
+
+#define DOL_MAX_TEXT_SECTION_COUNT 7
+#define DOL_MAX_DATA_SECTION_COUNT 11
 #define DOL_MAX_SECTION_COUNT 18
 
 #define DOLHDR_OFFSETS_OFF 0x0
@@ -38,12 +43,18 @@ public:
     uint32_t offset;
     uint32_t address;
     uint32_t length;
+
+    /**
+     * @brief Whether it is a text section or data section
+     */
+    bool text;
+    std::string name;
     uint8_t* data = nullptr;
 
-    DolSection(uint8_t* dol, uint32_t offset, uint32_t address, uint32_t length);
+    DolSection(uint8_t* dol, uint32_t offset, uint32_t address, uint32_t length, bool text);
     ~DolSection();
     DolSection(DolSection&& other) noexcept : offset(other.offset), address(other.address),
-        length(other.length), data(other.data) {
+        length(other.length), text(other.text), name(other.name), data(other.data) {
         other.data = nullptr;
     }
     std::ostream& print(std::ostream& os) const;
@@ -57,6 +68,8 @@ public:
     // More manageable representation of DOL data
     std::vector<DolSection> secs;
 
-    Dol(uint8_t* dol);
+    Dol(uint8_t* dol, std::optional<ExtraInfo> extra_info = std::nullopt);
     std::ostream& print(std::ostream& os) const;
+private:
+    void setSectionName(uint8_t sec, std::optional<ExtraInfo> extra_info);
 };

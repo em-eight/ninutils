@@ -121,18 +121,18 @@ std::string relocTypeToString(uint8_t type) {
         return "R_RVL_ADDR16_HA";
     case R_PPC_ADDR14:
         return "R_RVL_ADDR14";
-    case R_PPC_ADDR14_8:
-        return "R_RVL_ADDR14";
-    case R_PPC_ADDR14_9:
-        return "R_RVL_ADDR14";
+    case R_PPC_ADDR14_BRTAKEN:
+        return "R_RVL_ADDR14_BRTAKEN";
+    case R_PPC_ADDR14_BRNTAKEN:
+        return "R_RVL_ADDR14_BRNTAKEN";
     case R_PPC_REL24:
         return "R_RVL_REL24";
     case R_PPC_REL14:
         return "R_RVL_REL14";
-    case R_PPC_REL14_12:
-        return "R_RVL_REL14";
-    case R_PPC_REL14_13:
-        return "R_RVL_REL14";
+    case R_PPC_REL14_BRTAKEN:
+        return "R_RVL_REL14_BRTAKEN";
+    case R_PPC_REL14_BRNTAKEN:
+        return "R_RVL_REL14_BRNTAKEN";
     case R_RVL_NONE:
         return "R_RVL_NONE";
     case R_RVL_SECT:
@@ -186,7 +186,6 @@ Rel::Rel(uint8_t* rel, std::optional<ExtraInfo> extra_info) : hdr(rel) {
         imps[i].index = reloc_count;
         while (true) {
             RelRelocRaw reloc(rel + imps_raw[i].offset + it);
-            //std::cout << reloc;
             rels_raw.emplace_back(reloc);
             if (reloc.type == R_RVL_STOP) {
                 break;
@@ -198,9 +197,8 @@ Rel::Rel(uint8_t* rel, std::optional<ExtraInfo> extra_info) : hdr(rel) {
                 section_offset += reloc.offset;
             } else {
                 section_offset += reloc.offset;
-                rels.emplace_back(RelReloc(section_idx, section_offset, reloc.type,
-                    imps_raw[i].module_id, reloc.section, reloc.addend));
-                //std::cout << HEX_FMT(secs_raw[reloc.section].offset + reloc.addend + MKW_PAL_REL_LOAD_ADDR) << std::endl;
+                rels.emplace_back(section_idx, section_offset, reloc.type,
+                    imps_raw[i].module_id, reloc.section, reloc.addend);
                 module_reloc_count++;
             }
             it += REL_REL_SIZE;

@@ -4,8 +4,17 @@
 #include <cstdint>
 #include <map>
 
+class SectionExtraInfo {
+public:
+    std::string name;
+
+    SectionExtraInfo() : name("") {} // default constructor
+    SectionExtraInfo(std::string name) : name(name) {}
+};
+
 class ModuleExtraInfo {
 public:
+    std::map<int32_t, SectionExtraInfo> sections;
     /**
      * @brief The virtual memory address the module is loaded at.
      * For REL, this is the VMA the start of the header is mapped at. 0x0 is unknown/invalid 
