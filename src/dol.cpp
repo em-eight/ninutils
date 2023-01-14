@@ -129,13 +129,13 @@ std::ostream& DolHeaderRaw::print(std::ostream& os) const {
 }
 
 std::ostream& DolSection::print(std::ostream& os) const {
-    os << WIDTH(name, 10) << HEX_FMTW(offset, 12) << HEX_FMTW(address, 12) << HEX_FMTW(length, 12) << "\n";
+    os << WIDTH(name, 12) << HEX_FMTW(offset, 12) << HEX_FMTW(address, 12) << HEX_FMTW(length, 12) << "\n";
     return os;
 }
 
 std::ostream& Dol::print(std::ostream& os) const {
     os << "Sections:" << "\n";
-    os << WIDTH("Name", 10) << WIDTH("Offset", 12) << WIDTH("Address", 12) << WIDTH("Size", 10) << "\n";
+    os << WIDTH("Name", 12) << WIDTH("Offset", 12) << WIDTH("Address", 12) << WIDTH("Size", 10) << "\n";
     for (int i = 0; i < secs.size(); i++) {
         secs[i].print(os);
     }

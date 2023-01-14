@@ -24,19 +24,19 @@ ExtraInfo::ExtraInfo(std::string preset) {
 
         ModuleExtraInfo dolInfo;
         dolInfo.sections.emplace(0, ".init");
-        dolInfo.sections.emplace(1, "extab");
-        dolInfo.sections.emplace(2, "extabindex");
-        dolInfo.sections.emplace(3, ".text");
+        dolInfo.sections.emplace(1, ".text");
+        dolInfo.sections.emplace(2, "extab");
+        dolInfo.sections.emplace(3, "extabindex");
         dolInfo.sections.emplace(4, ".ctors");
         dolInfo.sections.emplace(5, ".dtors");
-        dolInfo.sections.emplace(7, ".rodata");
-        dolInfo.sections.emplace(8, ".data");
-        dolInfo.sections.emplace(9, ".bss");
-        dolInfo.sections.emplace(10, ".sdata");
-        dolInfo.sections.emplace(11, ".sbss");
-        dolInfo.sections.emplace(12, ".sdata2");
-        dolInfo.sections.emplace(13, ".sbss2");
-        modules.insert({0, relInfo});
+        dolInfo.sections.emplace(6, ".rodata");
+        dolInfo.sections.emplace(7, ".data");
+        dolInfo.sections.emplace(8, ".bss");
+        dolInfo.sections.emplace(9, ".sdata");
+        dolInfo.sections.emplace(10, ".sbss");
+        dolInfo.sections.emplace(11, ".sdata2");
+        dolInfo.sections.emplace(12, ".sbss2");
+        modules.insert({0, dolInfo});
     }
 }
 

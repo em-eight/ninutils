@@ -10,17 +10,21 @@
 #include <string>
 #include <unistd.h>
 
-class ReadRelArgs {
+class ReadDolArgs {
 public:
     bool raw = false, hdr = false;
-    std::string relPath;
+    std::string dolPath;
+    std::string preset = "";
 
     int readArgs(int argc, char** argv) {
         int c;
-        while ((c = getopt (argc, argv, "w")) != -1) {
+        while ((c = getopt (argc, argv, "wp:")) != -1) {
             switch (c) {
             case 'w':
                 raw = true;
+                break;
+            case 'p':
+                preset = std::string(optarg);
                 break;
             default:
                 return -2;
@@ -28,7 +32,7 @@ public:
         }
 
         if (optind < argc) {
-            relPath = std::string(argv[optind]);
+            dolPath = std::string(argv[optind]);
         } else {
             return -1;
         }
@@ -39,18 +43,21 @@ public:
         os << "Usage: readdol <option(s)> dol_file\n"
             " Display information about the contents of DOL files\n"
             " Options are:\n"
-            << WIDTH("\t-w", 5) << "Print in raw format, aka as is from the file\n";
+            << WIDTH("\t-w", 5) << "Print in raw format, aka as is from the file\n"
+            << WIDTH("\t-p <preset>", 14) << "Specify a preset to get game-specific info (e.g. VMAs of REL symbols)\n";
+
+        ninutils::ExtraInfo::printPresets(os);
     }
 };
 
 int main(int argc, char** argv) {
-    ReadRelArgs args;
+    ReadDolArgs args;
     if (args.readArgs(argc, argv) < 0) {
         args.printUsage(std::cout);
         exit(-1);
     }
 
-    std::ifstream dolstrm(args.relPath, std::ios::binary | std::ios::in | std::ios::ate);
+    std::ifstream dolstrm(args.dolPath, std::ios::binary | std::ios::in | std::ios::ate);
     if (!dolstrm.is_open()) {
         std::cout << "File " << argv[1] << " not found." << std::endl;
         exit(-2);
@@ -60,7 +67,9 @@ int main(int argc, char** argv) {
         std::vector<char> buffer(size);
         dolstrm.read(buffer.data(), size);
 
-        ninutils::Dol dol((uint8_t*) buffer.data(), size);
+        ninutils::ExtraInfo extra_info(args.preset);
+        ninutils::Dol dol((uint8_t*) buffer.data(), size,
+            extra_info.description.empty() ? std::nullopt : std::optional<ninutils::ExtraInfo>(extra_info));
         if (args.raw) {
             dol.hdr.print(std::cout);
         } else {
