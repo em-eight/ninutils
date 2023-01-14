@@ -91,7 +91,7 @@ int main(int argc, char** argv) {
         relstrm.read(buffer.data(), size);
 
         ninutils::ExtraInfo extra_info(args.preset);
-        ninutils::Rel rel((uint8_t*) buffer.data(),
+        ninutils::Rel rel((uint8_t*) buffer.data(), size,
             extra_info.description.empty() ? std::nullopt : std::optional<ninutils::ExtraInfo>(extra_info));
         if (args.raw) {
             rel.printRaw(std::cout, args.rels, args.hdr, args.secs, args.imps);

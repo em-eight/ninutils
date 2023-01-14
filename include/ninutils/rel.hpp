@@ -66,17 +66,13 @@ public:
     uint8_t unknown;
     uint8_t exec;
     uint32_t length;
-    uint8_t* data = nullptr;
 
-    RelSection(uint8_t* rel, uint8_t* sec);
-    ~RelSection();
+    RelSection(uint8_t* sec);
     RelSection(const RelSection& other) : offset(other.offset), unknown(other.unknown),
         exec(other.exec), length(other.length) {
-        data = (uint8_t*) malloc(length);
     }
     RelSection(RelSection&& other) noexcept : offset(other.offset), unknown(other.unknown),
-        exec(other.exec), length(other.length), data(other.data) {
-        other.data = nullptr;
+        exec(other.exec), length(other.length) {
     }
     friend std::ostream& operator<<(std::ostream& os, const RelSection& rs);
 };
@@ -173,12 +169,18 @@ public:
     std::vector<RelSection> secs;
     std::vector<RelImp> imps;
     std::vector<RelReloc> rels;
+    
+    // file data
+    uint8_t* file = nullptr;
+    size_t fileSize;
+
     /**
      * Load information. 0x0 if unknown
     */
     uint32_t load_addr;
     uint32_t bss_load_addr;
-    Rel(uint8_t* rel, std::optional<ExtraInfo> extra_info = std::nullopt);
+    Rel(uint8_t* rel, size_t size, std::optional<ExtraInfo> extra_info = std::nullopt);
+    ~Rel();
     std::ostream& printRaw(std::ostream& os, bool print_relocs=false, bool p_hdr=true,
         bool p_secs=false, bool p_imps=false) const;
     std::ostream& print(std::ostream& os, bool print_relocs=false, bool p_hdr=true,

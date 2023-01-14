@@ -60,7 +60,7 @@ int main(int argc, char** argv) {
         std::vector<char> buffer(size);
         dolstrm.read(buffer.data(), size);
 
-        ninutils::Dol dol((uint8_t*) buffer.data());
+        ninutils::Dol dol((uint8_t*) buffer.data(), size);
         if (args.raw) {
             dol.hdr.print(std::cout);
         } else {

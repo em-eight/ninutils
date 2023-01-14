@@ -116,19 +116,11 @@ std::ostream& operator<<(std::ostream& os, const RelHeader& relhdr)
     return os;
 }
 
-RelSection::RelSection(uint8_t* rel, uint8_t* sec) {
+RelSection::RelSection(uint8_t* sec) {
     offset = 0xfffffffc & readbe32(sec);
     unknown = (readbe32(sec) >> 1) & 0x1;
     exec = (readbe32(sec) >> 0) & 0x1;
     length = readbe32(sec + 0x4);
-
-    data = (uint8_t*) malloc(length);
-    memcpy(data, rel + offset, length);
-}
-
-RelSection::~RelSection() {
-    if (data)
-        free(data);
 }
 
 std::ostream& operator<<(std::ostream& os, const RelSection& relsec)
@@ -218,10 +210,10 @@ std::ostream& RelReloc::print(std::ostream& os) const {
     return os;
 }
 
-Rel::Rel(uint8_t* rel, std::optional<ExtraInfo> extra_info) : hdr(rel) {
+Rel::Rel(uint8_t* rel, size_t size, std::optional<ExtraInfo> extra_info) : hdr(rel), fileSize(size) {
     secs_raw.reserve(hdr.numSections);
     for (int i = 0; i < hdr.numSections; i++) {
-        RelSection sec(rel, rel + hdr.sectionInfoOffset + i*REL_SECTION_INFO_SIZE);
+        RelSection sec(rel + hdr.sectionInfoOffset + i*REL_SECTION_INFO_SIZE);
         secs_raw.emplace_back(sec);
         if (sec.length > 0) secs.emplace_back(sec);
     }
@@ -270,13 +262,19 @@ Rel::Rel(uint8_t* rel, std::optional<ExtraInfo> extra_info) : hdr(rel) {
 
     // Get extra info from ExtraInfo if provided
     if (extra_info.has_value() && extra_info->modules.count(hdr.id) > 0) {
-            load_addr = extra_info->modules[hdr.id].load_address;
-            bss_load_addr = extra_info->modules[hdr.id].bss_load_address;
+        load_addr = extra_info->modules[hdr.id].load_address;
+        bss_load_addr = extra_info->modules[hdr.id].bss_load_address;
     } else {
         load_addr = 0x0;
         bss_load_addr = 0x0;
     }
     
+    memcpy(file, rel, size);
+}
+
+Rel::~Rel() {
+    if (file)
+        free(file);
 }
 
 std::ostream& Rel::printRaw(std::ostream& os, bool print_relocs, bool p_hdr, bool p_secs, bool p_imps) const {

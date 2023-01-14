@@ -4,6 +4,7 @@
 
 #define DEF_DOL_TEXT_SECTION_NAME ".text"
 #define DEF_DOL_DATA_SECTION_NAME ".data"
+#define DEF_DOL_BSS_SECTION_NAME ".bss"
 
 #define DOLHDR_OFFSETS_OFF 0x0
 #define DOLHDR_OFFSET_SIZE 0x4
@@ -29,48 +30,59 @@ DolHeaderRaw::DolHeaderRaw(uint8_t* dol) {
     entry_point = readbe32(dol + DOLHDR_ENTRYPOINT_OFF);
 }
 
-DolSection::DolSection(uint8_t* dol, uint32_t offset, uint32_t address, uint32_t length, bool text)
-        : offset(offset), address(address), length(length), text(text) {
-    data = (uint8_t*) malloc(length);
-    memcpy(data, dol + offset, length);
-}
-
-DolSection::~DolSection() {
-    if (data != nullptr)
-        free(data);
+DolSection::DolSection(uint32_t offset, uint32_t address, uint32_t length, bool text)
+        : offset(offset), address(address), length(length), isText(text) {
 }
 
 void Dol::setSectionName(uint8_t sec, std::optional<ExtraInfo> extra_info) {
     if (extra_info.has_value() && extra_info->modules.find(0) != extra_info->modules.end()) {
         secs[sec].name = extra_info->modules[0].sections[sec].name;
+        return;
     }
 
     // generate sensible default name
     uint8_t similarSectionTypeCount = 0;
+    uint8_t sectionTypeIdx = 0;
     for (uint8_t i = 0; i < secs.size(); i++) {
         if (i == sec) continue;
 
-        if (secs[i].text == secs[i].text) {
+        if (secs[i].isText == secs[sec].isText && secs[i].isBss() == secs[sec].isBss()) {
             similarSectionTypeCount++;
+            if (i < sec) sectionTypeIdx++;
         }
     }
-    if (similarSectionTypeCount == 0) {
-        secs[sec].name = secs[sec].text ? DEF_DOL_TEXT_SECTION_NAME : DEF_DOL_DATA_SECTION_NAME;
+    std::string sectionBaseName;
+    if (secs[sec].isText) {
+        sectionBaseName = DEF_DOL_TEXT_SECTION_NAME;
+    } else if (secs[sec].isBss()) {
+        sectionBaseName = DEF_DOL_DATA_SECTION_NAME;
     } else {
-        secs[sec].name = (secs[sec].text ? DEF_DOL_TEXT_SECTION_NAME : DEF_DOL_DATA_SECTION_NAME) +
+        sectionBaseName = DEF_DOL_BSS_SECTION_NAME;
+    }
+    if (similarSectionTypeCount == 0) {
+        secs[sec].name = secs[sec].isText ? DEF_DOL_TEXT_SECTION_NAME : DEF_DOL_DATA_SECTION_NAME;
+    } else {
+        secs[sec].name = (secs[sec].isText ? DEF_DOL_TEXT_SECTION_NAME : DEF_DOL_DATA_SECTION_NAME) +
             std::to_string(similarSectionTypeCount+1);
     }
 }
 
-Dol::Dol(uint8_t* dol, std::optional<ExtraInfo> extra_info) : hdr(dol) {
+Dol::Dol(uint8_t* dol, size_t size, std::optional<ExtraInfo> extra_info) : hdr(dol), fileSize(size) {
     secs.reserve(DOL_MAX_SECTION_COUNT);
     for (int i = 0; i < DOL_MAX_SECTION_COUNT; i++) {
         if (hdr.offsets[i] != 0 && hdr.addresses[i] != 0 && hdr.lengths[i] != 0) {
-            secs.emplace_back(dol, hdr.offsets[i], hdr.addresses[i], hdr.lengths[i], i < 7);
+            secs.emplace_back(hdr.offsets[i], hdr.addresses[i], hdr.lengths[i], i < 7);
             setSectionName(secs.size()-1, extra_info);
         }
     }
     secs.shrink_to_fit();
+
+    memcpy(file, dol, size);
+}
+
+Dol::~Dol() {
+    if (file != nullptr)
+        free(file);
 }
 
 std::ostream& DolHeaderRaw::print(std::ostream& os) const {

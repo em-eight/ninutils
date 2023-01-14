@@ -40,16 +40,11 @@ public:
     /**
      * @brief Whether it is a text section or data section
      */
-    bool text;
+    bool isText;
     std::string name;
-    uint8_t* data = nullptr;
 
-    DolSection(uint8_t* dol, uint32_t offset, uint32_t address, uint32_t length, bool text);
-    ~DolSection();
-    DolSection(DolSection&& other) noexcept : offset(other.offset), address(other.address),
-        length(other.length), text(other.text), name(other.name), data(other.data) {
-        other.data = nullptr;
-    }
+    DolSection(uint32_t offset, uint32_t address, uint32_t length, bool text);
+    inline bool isBss() const { return false; } // TODO: Create section struct for .bss sections
     std::ostream& print(std::ostream& os) const;
 };
 
@@ -60,8 +55,13 @@ public:
 
     // More manageable representation of DOL data
     std::vector<DolSection> secs;
+    
+    // file data
+    uint8_t* file = nullptr;
+    size_t fileSize;
 
-    Dol(uint8_t* dol, std::optional<ExtraInfo> extra_info = std::nullopt);
+    Dol(uint8_t* dol, size_t fileSize, std::optional<ExtraInfo> extra_info = std::nullopt);
+    ~Dol();
     std::ostream& print(std::ostream& os) const;
 private:
     void setSectionName(uint8_t sec, std::optional<ExtraInfo> extra_info);
