@@ -4,10 +4,7 @@
 
 #include "ninutils/dol.hpp"
 #include "ninutils/utils.hpp"
-
-#define DEF_DOL_TEXT_SECTION_NAME ".text"
-#define DEF_DOL_DATA_SECTION_NAME ".data"
-#define DEF_DOL_BSS_SECTION_NAME ".bss"
+#include "ninutils/common.hpp"
 
 #define DOLHDR_OFFSETS_OFF 0x0
 #define DOLHDR_OFFSET_SIZE 0x4
@@ -56,16 +53,16 @@ void Dol::setSectionName(uint8_t sec, std::optional<ExtraInfo> extra_info) {
     }
     std::string sectionBaseName;
     if (secs[sec].isText) {
-        sectionBaseName = DEF_DOL_TEXT_SECTION_NAME;
+        sectionBaseName = DEF_TEXT_SECTION_NAME;
     } else if (secs[sec].isBss()) {
-        sectionBaseName = DEF_DOL_DATA_SECTION_NAME;
+        sectionBaseName = DEF_DATA_SECTION_NAME;
     } else {
-        sectionBaseName = DEF_DOL_BSS_SECTION_NAME;
+        sectionBaseName = DEF_BSS_SECTION_NAME;
     }
     if (similarSectionTypeCount == 0) {
-        secs[sec].name = secs[sec].isText ? DEF_DOL_TEXT_SECTION_NAME : DEF_DOL_DATA_SECTION_NAME;
+        secs[sec].name = secs[sec].isText ? DEF_TEXT_SECTION_NAME : DEF_DATA_SECTION_NAME;
     } else {
-        secs[sec].name = (secs[sec].isText ? DEF_DOL_TEXT_SECTION_NAME : DEF_DOL_DATA_SECTION_NAME) +
+        secs[sec].name = (secs[sec].isText ? DEF_TEXT_SECTION_NAME : DEF_DATA_SECTION_NAME) +
             std::to_string(similarSectionTypeCount+1);
     }
 }
@@ -88,8 +85,9 @@ Dol::Dol(uint8_t* dol, size_t size, std::optional<ExtraInfo> extra_info) : hdr(d
     if (dolSectionIdxsInterectingBss.size() == 0) {
         secs.emplace_back(0, hdr.bss_address, hdr.bss_length, false, ".bss");
     } else {
-        std::sort(dolSectionIdxsInterectingBss.begin(), dolSectionIdxsInterectingBss.end(), 
-            [this](int a, int b) {return hdr.addresses[a] < hdr.addresses[b];});
+        std::sort(dolSectionIdxsInterectingBss.begin(), dolSectionIdxsInterectingBss.end(), [this](int a, int b) {
+            return hdr.addresses[a] < hdr.addresses[b];
+        });
         secs.emplace_back(0, hdr.bss_address, hdr.addresses[dolSectionIdxsInterectingBss[0]], false, ".bss");
         int count_sda= 1;
         for (int idx : dolSectionIdxsInterectingBss) {
@@ -104,6 +102,9 @@ Dol::Dol(uint8_t* dol, size_t size, std::optional<ExtraInfo> extra_info) : hdr(d
             count_sda++;
         }
     }
+    std::sort(secs.begin(), secs.end(), [](DolSection a, DolSection b) {
+        return a.address < b.address;
+    });
     secs.shrink_to_fit();
 
     file = new uint8_t[size];

@@ -1,6 +1,7 @@
 
 #include "ninutils/utils.hpp"
 #include "ninutils/rel.hpp"
+#include "ninutils/common.hpp"
 
 #include <cstring>
 
@@ -125,7 +126,7 @@ RelSection::RelSection(uint8_t* sec) {
 
 std::ostream& operator<<(std::ostream& os, const RelSection& relsec)
 {
-    os << HEX_FMTW(relsec.offset, 12)  << BOOL_FMTW(relsec.unknown, 10)
+    os << WIDTH(relsec.name, 10) << HEX_FMTW(relsec.offset, 12)  << BOOL_FMTW(relsec.unknown, 10)
         << BOOL_FMTW(NUM(relsec.exec), 12) << HEX_FMTW(relsec.length, 12) << "\n";
     return os;
 }
@@ -210,12 +211,49 @@ std::ostream& RelReloc::print(std::ostream& os) const {
     return os;
 }
 
+void Rel::setSectionName(uint8_t sec, std::optional<ExtraInfo> extra_info) {
+    if (extra_info.has_value() && extra_info->modules.find(hdr.id) != extra_info->modules.end()) {
+        std::cout << "preset " << extra_info->modules[hdr.id].sections[sec].name;
+        secs[sec].name = extra_info->modules[hdr.id].sections[sec].name;
+        return;
+    }
+
+    // generate sensible default name
+    uint8_t similarSectionTypeCount = 0;
+    uint8_t sectionTypeIdx = 0;
+    for (uint8_t i = 0; i < secs.size(); i++) {
+        if (i == sec) continue;
+
+        if (secs[i].exec == secs[sec].exec && secs[i].isBss() == secs[sec].isBss()) {
+            similarSectionTypeCount++;
+            if (i < sec) sectionTypeIdx++;
+        }
+    }
+    std::string sectionBaseName;
+    if (secs[sec].exec) {
+        sectionBaseName = DEF_TEXT_SECTION_NAME;
+    } else if (secs[sec].isBss()) {
+        sectionBaseName = DEF_DATA_SECTION_NAME;
+    } else {
+        sectionBaseName = DEF_BSS_SECTION_NAME;
+    }
+    if (similarSectionTypeCount == 0) {
+        secs[sec].name = secs[sec].exec ? DEF_TEXT_SECTION_NAME : DEF_DATA_SECTION_NAME;
+    } else {
+        secs[sec].name = (secs[sec].exec ? DEF_TEXT_SECTION_NAME : DEF_DATA_SECTION_NAME) +
+            std::to_string(similarSectionTypeCount+1);
+    }
+}
+
 Rel::Rel(uint8_t* rel, size_t size, std::optional<ExtraInfo> extra_info) : hdr(rel), fileSize(size) {
     secs_raw.reserve(hdr.numSections);
     for (int i = 0; i < hdr.numSections; i++) {
         RelSection sec(rel + hdr.sectionInfoOffset + i*REL_SECTION_INFO_SIZE);
         secs_raw.emplace_back(sec);
-        if (sec.length > 0) secs.emplace_back(sec);
+        if (sec.length > 0) {
+            secs.emplace_back(sec);
+            setSectionName(secs.size()-1, extra_info);
+        }
     }
 
     uint32_t numImps = hdr.impSize / REL_IMP_SIZE;
@@ -284,7 +322,7 @@ std::ostream& Rel::printRaw(std::ostream& os, bool print_relocs, bool p_hdr, boo
 
     if (p_secs) {
         os << "\nSections:\n";
-        os << WIDTH("Offset", 12) << WIDTH("Unknown",10) << WIDTH("Executable",12) <<  WIDTH("Size",12) << "\n";
+        os << WIDTH("Name", 10) << WIDTH("Offset", 12) << WIDTH("Unknown",10) << WIDTH("Executable",12) <<  WIDTH("Size",12) << "\n";
         for (const RelSection& sec : secs_raw)
             os << sec;
     }
@@ -311,7 +349,7 @@ std::ostream& Rel::print(std::ostream& os, bool p_relocs, bool p_hdr, bool p_sec
 
     if (p_secs) {
         os << "\nSections:\n";
-        os << WIDTH("Offset", 12) << WIDTH("Unknown",10) << WIDTH("Executable",12) <<  WIDTH("Size",12) << "\n";
+        os << WIDTH("Name", 10) << WIDTH("Offset", 12) << WIDTH("Unknown",10) << WIDTH("Executable",12) <<  WIDTH("Size",12) << "\n";
         for (const RelSection& sec : secs) {
             os << sec;
         }

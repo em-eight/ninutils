@@ -66,14 +66,10 @@ public:
     uint8_t unknown;
     uint8_t exec;
     uint32_t length;
+    std::string name = "";
 
     RelSection(uint8_t* sec);
-    RelSection(const RelSection& other) : offset(other.offset), unknown(other.unknown),
-        exec(other.exec), length(other.length) {
-    }
-    RelSection(RelSection&& other) noexcept : offset(other.offset), unknown(other.unknown),
-        exec(other.exec), length(other.length) {
-    }
+    inline bool isBss() const { return offset == 0; }
     friend std::ostream& operator<<(std::ostream& os, const RelSection& rs);
 };
 
@@ -185,5 +181,7 @@ public:
         bool p_secs=false, bool p_imps=false) const;
     std::ostream& print(std::ostream& os, bool print_relocs=false, bool p_hdr=true,
         bool p_secs=false, bool p_imps=false) const;
+private:
+    void setSectionName(uint8_t sec, std::optional<ExtraInfo> extra_info);
 };
 } // ns ninutils
