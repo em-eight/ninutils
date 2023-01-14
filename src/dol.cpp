@@ -1,4 +1,7 @@
 
+#include <algorithm>
+#include <cassert>
+
 #include "ninutils/dol.hpp"
 #include "ninutils/utils.hpp"
 
@@ -30,8 +33,8 @@ DolHeaderRaw::DolHeaderRaw(uint8_t* dol) {
     entry_point = readbe32(dol + DOLHDR_ENTRYPOINT_OFF);
 }
 
-DolSection::DolSection(uint32_t offset, uint32_t address, uint32_t length, bool text)
-        : offset(offset), address(address), length(length), isText(text) {
+DolSection::DolSection(uint32_t offset, uint32_t address, uint32_t length, bool text, std::string name)
+        : offset(offset), address(address), length(length), isText(text), name(name) {
 }
 
 void Dol::setSectionName(uint8_t sec, std::optional<ExtraInfo> extra_info) {
@@ -69,14 +72,41 @@ void Dol::setSectionName(uint8_t sec, std::optional<ExtraInfo> extra_info) {
 
 Dol::Dol(uint8_t* dol, size_t size, std::optional<ExtraInfo> extra_info) : hdr(dol), fileSize(size) {
     secs.reserve(DOL_MAX_SECTION_COUNT);
+    std::vector<uint32_t> dolSectionIdxsInterectingBss;
     for (int i = 0; i < DOL_MAX_SECTION_COUNT; i++) {
-        if (hdr.offsets[i] != 0 && hdr.addresses[i] != 0 && hdr.lengths[i] != 0) {
+        if (hdr.offsets[i] == 0 || hdr.addresses[i] == 0 || hdr.lengths[i] == 0) {
+            continue;
+        }
+        if (hdr.addresses[i] > hdr.bss_address && hdr.addresses[i] + hdr.lengths[i] < hdr.bss_address + hdr.bss_length) {
+            dolSectionIdxsInterectingBss.push_back(i);
+        } else {
             secs.emplace_back(hdr.offsets[i], hdr.addresses[i], hdr.lengths[i], i < 7);
             setSectionName(secs.size()-1, extra_info);
         }
     }
+    // Handle SDA sections and bss
+    if (dolSectionIdxsInterectingBss.size() == 0) {
+        secs.emplace_back(0, hdr.bss_address, hdr.bss_length, false, ".bss");
+    } else {
+        std::sort(dolSectionIdxsInterectingBss.begin(), dolSectionIdxsInterectingBss.end(), 
+            [this](int a, int b) {return hdr.addresses[a] < hdr.addresses[b];});
+        secs.emplace_back(0, hdr.bss_address, hdr.addresses[dolSectionIdxsInterectingBss[0]], false, ".bss");
+        int count_sda= 1;
+        for (int idx : dolSectionIdxsInterectingBss) {
+            std::string suffix = count_sda != 1 ? std::to_string(count_sda) : std::string("");
+            secs.emplace_back(hdr.offsets[idx], hdr.addresses[idx], hdr.lengths[idx], false, ".sdata" + suffix);
+
+            uint32_t curr_sbss_start = hdr.addresses[idx] + hdr.lengths[idx];
+            uint32_t curr_sbss_length = count_sda < dolSectionIdxsInterectingBss.size() ? hdr.addresses[idx+1]-curr_sbss_start : hdr.bss_length;
+            assert(curr_sbss_length > 0);
+            secs.emplace_back(0, curr_sbss_start, curr_sbss_length, false, ".sbss" + suffix);
+
+            count_sda++;
+        }
+    }
     secs.shrink_to_fit();
 
+    file = new uint8_t[size];
     memcpy(file, dol, size);
 }
 
@@ -98,19 +128,19 @@ std::ostream& DolHeaderRaw::print(std::ostream& os) const {
 }
 
 std::ostream& DolSection::print(std::ostream& os) const {
-    os << HEX_FMTW(offset, 12) << HEX_FMTW(address, 12) << HEX_FMTW(length, 12) << "\n";
+    os << WIDTH(name, 10) << HEX_FMTW(offset, 12) << HEX_FMTW(address, 12) << HEX_FMTW(length, 12) << "\n";
     return os;
 }
 
 std::ostream& Dol::print(std::ostream& os) const {
     os << "Sections:" << "\n";
-    os << WIDTH("Offset", 12) << WIDTH("Address", 12) << WIDTH("Size", 10) << "\n";
+    os << WIDTH("Name", 10) << WIDTH("Offset", 12) << WIDTH("Address", 12) << WIDTH("Size", 10) << "\n";
     for (int i = 0; i < secs.size(); i++) {
         secs[i].print(os);
     }
-    os << WIDTH(".bss address", 14) << HEX_FMT(hdr.bss_address) << "\n";
-    os << WIDTH(".bss length", 14) << HEX_FMT(hdr.bss_length) << "\n";
-    os << WIDTH("entry point", 14) << HEX_FMT(hdr.entry_point) << "\n";
+    os << WIDTH(".bss address:", 15) << HEX_FMT(hdr.bss_address) << "\n";
+    os << WIDTH(".bss length:", 15) << HEX_FMT(hdr.bss_length) << "\n";
+    os << WIDTH("entry point:", 15) << HEX_FMT(hdr.entry_point) << "\n";
     return os;
 }
 } // ns ninutils

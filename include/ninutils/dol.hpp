@@ -41,10 +41,10 @@ public:
      * @brief Whether it is a text section or data section
      */
     bool isText;
-    std::string name;
+    std::string name = "";
 
-    DolSection(uint32_t offset, uint32_t address, uint32_t length, bool text);
-    inline bool isBss() const { return false; } // TODO: Create section struct for .bss sections
+    DolSection(uint32_t offset, uint32_t address, uint32_t length, bool text, std::string name = "");
+    inline bool isBss() const { return offset == 0; }
     std::ostream& print(std::ostream& os) const;
 };
 

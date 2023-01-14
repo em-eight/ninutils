@@ -269,6 +269,7 @@ Rel::Rel(uint8_t* rel, size_t size, std::optional<ExtraInfo> extra_info) : hdr(r
         bss_load_addr = 0x0;
     }
     
+    file = new uint8_t[size];
     memcpy(file, rel, size);
 }
 
