@@ -10,63 +10,6 @@
 
 #include "extra_info.hpp"
 
-#define RELHDR_ID_OFF 0x00
-#define RELHDR_ID_SIZE 0x04
-#define RELHDR_NEXT_OFF 0x04
-#define RELHDR_NEXT_SIZE 0x04
-#define RELHDR_PREV_OFF 0x08
-#define RELHDR_PREV_SIZE 0x04
-#define RELHDR_NUMSECTIONS_OFF 0x0c
-#define RELHDR_NUMSECTIONS_SIZE 0x04
-#define RELHDR_SECTIONINFOOFFSET_OFF 0x10
-#define RELHDR_SECTIONINFOOFFSET_SIZE 0x04
-#define RELHDR_NAMEOFFSET_OFF 0x14
-#define RELHDR_NAMEOFFSET_SIZE 0x04
-#define RELHDR_NAMESIZE_OFF 0x18
-#define RELHDR_NAMESIZE_SIZE 0x04
-#define RELHDR_VERSION_OFF 0x1c
-#define RELHDR_VERSION_SIZE 0x04
-#define RELHDR_BSSSIZE_OFF 0x20
-#define RELHDR_BSSSIZE_SIZE 0x04
-#define RELHDR_RELOFFSET_OFF 0x24
-#define RELHDR_RELOFFSET_SIZE 0x04
-#define RELHDR_IMPOFFSET_OFF 0x28
-#define RELHDR_IMPOFFSET_SIZE 0x04
-#define RELHDR_IMPSIZE_OFF 0x2c
-#define RELHDR_IMPSIZE_SIZE 0x04
-#define RELHDR_PROLOGSECTION_OFF 0x30
-#define RELHDR_PROLOGSECTION_SIZE 0x01
-#define RELHDR_EPILOGSECTION_OFF 0x31
-#define RELHDR_EPILOGSECTION_SIZE 0x01
-#define RELHDR_UNRESOLVEDSECTION_OFF 0x32
-#define RELHDR_UNRESOLVEDSECTION_SIZE 0x01
-#define RELHDR_BSSSECTION_OFF 0x33
-#define RELHDR_BSSSECTION_SIZE 0x01
-#define RELHDR_PROLOG_OFF 0x34
-#define RELHDR_PROLOG_SIZE 0x04
-#define RELHDR_EPILOG_OFF 0x38
-#define RELHDR_EPILOG_SIZE 0x04
-#define RELHDR_UNRESOLVED_OFF 0x3c
-#define RELHDR_UNRESOLVED_SIZE 0x04
-#define RELHDR_ALIGN_OFF 0x40
-#define RELHDR_ALIGN_SIZE 0x04
-#define RELHDR_BSSALIGN_OFF 0x44
-#define RELHDR_BSSALIGN_SIZE 0x04
-#define RELHDR_FIXSIZE_OFF 0x48
-#define RELHDR_FIXSIZE_SIZE 0x04
-
-#define REL_SECTION_INFO_SIZE 0x8
-#define REL_IMP_SIZE 0x8
-#define REL_REL_SIZE 0x8
-
-#define RELIMP_MODULEID_OFF 0x0
-#define RELIMP_OFFSET_OFF 0x4
-
-#define RELREL_OFFSET_OFF 0x0
-#define RELREL_TYPE_OFF 0x2
-#define RELREL_SECTION_OFF 0x3
-#define RELREL_ADDEND_OFF 0x4
-
 #define R_PPC_NONE 0
 #define R_PPC_ADDR32 1
 #define R_PPC_ADDR24 2
@@ -85,6 +28,8 @@
 #define R_RVL_SECT 202
 #define R_RVL_STOP 203
 #define R_RVL_MRKREF 204
+
+namespace ninutils {
 
 class RelHeader {
 public:
@@ -228,6 +173,9 @@ public:
     std::vector<RelSection> secs;
     std::vector<RelImp> imps;
     std::vector<RelReloc> rels;
+    /**
+     * Load information. 0x0 if unknown
+    */
     uint32_t load_addr;
     uint32_t bss_load_addr;
     Rel(uint8_t* rel, std::optional<ExtraInfo> extra_info = std::nullopt);
@@ -236,3 +184,4 @@ public:
     std::ostream& print(std::ostream& os, bool print_relocs=false, bool p_hdr=true,
         bool p_secs=false, bool p_imps=false) const;
 };
+} // ns ninutils

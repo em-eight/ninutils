@@ -3,6 +3,10 @@
 
 #include <cstdint>
 #include <map>
+#include <string>
+#include <ostream>
+
+namespace ninutils {
 
 class SectionExtraInfo {
 public:
@@ -46,3 +50,5 @@ public:
 };
 
 extern const char* preset_names[];
+
+} // ns ninutils

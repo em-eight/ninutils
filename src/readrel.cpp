@@ -69,7 +69,7 @@ public:
             << WIDTH("\t-w", 14) << "Print in raw format, aka as is from the file\n"
             << WIDTH("\t-p <preset>", 14) << "Specify a preset to get game-specific info (e.g. VMAs of REL symbols)\n";
 
-        ExtraInfo::printPresets(os);
+        ninutils::ExtraInfo::printPresets(os);
     }
 };
 
@@ -90,9 +90,9 @@ int main(int argc, char** argv) {
         std::vector<char> buffer(size);
         relstrm.read(buffer.data(), size);
 
-        ExtraInfo extra_info(args.preset);
-        Rel rel((uint8_t*) buffer.data(),
-            extra_info.description.empty() ? std::nullopt : std::optional<ExtraInfo>(extra_info));
+        ninutils::ExtraInfo extra_info(args.preset);
+        ninutils::Rel rel((uint8_t*) buffer.data(),
+            extra_info.description.empty() ? std::nullopt : std::optional<ninutils::ExtraInfo>(extra_info));
         if (args.raw) {
             rel.printRaw(std::cout, args.rels, args.hdr, args.secs, args.imps);
         } else {
@@ -100,7 +100,7 @@ int main(int argc, char** argv) {
         }
 
         if (args.syms) {
-            SymbolTable symtab(rel);
+            ninutils::SymbolTable symtab(rel);
             symtab.print(std::cout);
         }
     }

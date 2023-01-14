@@ -6,6 +6,8 @@
 #define MKW_PAL_REL_LOAD_ADDR 0x805102e0
 #define MKW_PAL_REL_BSS_LOAD_ADDR 0x809bd6e0
 
+namespace ninutils {
+
 const char* preset_names[] = {MKW_PAL_PRESET_NAME};
 
 ExtraInfo::ExtraInfo(std::string preset) {
@@ -42,4 +44,5 @@ std::ostream& ExtraInfo::printPresets(std::ostream& os) {
         os << WIDTH(preset_name, 12) << extra_info.description << "\n";
     }
     return os;
+}
 }

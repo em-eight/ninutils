@@ -11,15 +11,8 @@
 #define DOL_MAX_DATA_SECTION_COUNT 11
 #define DOL_MAX_SECTION_COUNT 18
 
-#define DOLHDR_OFFSETS_OFF 0x0
-#define DOLHDR_OFFSET_SIZE 0x4
-#define DOLHDR_ADDRESSES_OFF 0x48
-#define DOLHDR_ADDRESS_SIZE 0x4
-#define DOLHDR_SIZES_OFF 0x90
-#define DOLHDR_SIZE_SIZE 0x4
-#define DOLHDR_BSSADDR_OFF 0xd8
-#define DOLHDR_BSSLEN_OFF 0xdc
-#define DOLHDR_ENTRYPOINT_OFF 0xe0
+
+namespace ninutils {
 
 class DolHeaderRaw {
 public:
@@ -73,3 +66,4 @@ public:
 private:
     void setSectionName(uint8_t sec, std::optional<ExtraInfo> extra_info);
 };
+} // ns ninutils

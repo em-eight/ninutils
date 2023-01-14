@@ -16,6 +16,8 @@
 #define BOOL_FMTW(X,n) std::left << std::setw(n) << std::setfill(' ') << (0==X ? "false" : "true")
 #define NUM(X) +X // hack that prints char/uint8_t as int
 
+namespace ninutils {
+
 inline uint8_t readbe8(void* src) {
     uint8_t num;
     memcpy(&num, src, 1);
@@ -39,3 +41,4 @@ inline uint64_t readbe64(void* src) {
     memcpy(&num, src, 8);
     return htobe64(num);
 }
+} // ns ninutils

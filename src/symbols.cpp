@@ -5,6 +5,8 @@
 #include <algorithm>
 #include <unordered_set>
 #include <set>
+
+namespace ninutils {
     
 void Symbol::genName() {
     std::stringstream stream;
@@ -105,3 +107,4 @@ void SymbolTable::inferSyms(const std::vector<Rel>& rels, const std::vector<int3
         }
     }
 }
+} // ns ninutils

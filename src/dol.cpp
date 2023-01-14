@@ -5,6 +5,17 @@
 #define DEF_DOL_TEXT_SECTION_NAME ".text"
 #define DEF_DOL_DATA_SECTION_NAME ".data"
 
+#define DOLHDR_OFFSETS_OFF 0x0
+#define DOLHDR_OFFSET_SIZE 0x4
+#define DOLHDR_ADDRESSES_OFF 0x48
+#define DOLHDR_ADDRESS_SIZE 0x4
+#define DOLHDR_SIZES_OFF 0x90
+#define DOLHDR_SIZE_SIZE 0x4
+#define DOLHDR_BSSADDR_OFF 0xd8
+#define DOLHDR_BSSLEN_OFF 0xdc
+#define DOLHDR_ENTRYPOINT_OFF 0xe0
+
+namespace ninutils {
 
 DolHeaderRaw::DolHeaderRaw(uint8_t* dol) {
     for (int i = 0; i < DOL_MAX_SECTION_COUNT; i++) {
@@ -90,3 +101,4 @@ std::ostream& Dol::print(std::ostream& os) const {
     os << WIDTH("entry point", 14) << HEX_FMT(hdr.entry_point) << "\n";
     return os;
 }
+} // ns ninutils

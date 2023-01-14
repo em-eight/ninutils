@@ -3,6 +3,8 @@
 
 #include "rel.hpp"
 
+namespace ninutils {
+
 class Symbol {
 public:
     int32_t module_id;
@@ -63,3 +65,4 @@ public:
 private:
     static std::vector<int32_t> getAllModules(const std::vector<Rel>& rels);
 };
+} // ns ninutils
