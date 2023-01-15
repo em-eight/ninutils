@@ -62,6 +62,8 @@ public:
 
     Dol(uint8_t* dol, size_t fileSize, std::optional<ExtraInfo> extra_info = std::nullopt);
     ~Dol();
+    std::optional<uint32_t> getSectionIdxByName(const std::string& name);
+    std::optional<uint32_t> getSectionIdxContainingAddress(uint32_t vma);
     std::ostream& print(std::ostream& os) const;
 private:
     void setSectionName(uint8_t sec, std::optional<ExtraInfo> extra_info);

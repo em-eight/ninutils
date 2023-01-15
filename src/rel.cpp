@@ -316,6 +316,26 @@ Rel::~Rel() {
         free(file);
 }
 
+std::optional<uint32_t> Rel::getSectionIdxByName(const std::string& name) {
+    for (uint32_t i = 0; i < secs.size(); i++) {
+        if (name == secs[i].name) {
+            return std::optional<uint32_t>(i);
+        }
+    }
+    return std::nullopt;
+}
+
+std::optional<uint32_t> Rel::getSectionIdxContainingAddress(uint32_t vma) {
+    if (load_addr == 0 || bss_load_addr) return std::nullopt; // no load information
+    for (uint32_t i = 0; i < secs.size(); i++) {
+        uint32_t sec_vma = secs[i].isBss() ? bss_load_addr : secs[i].offset + load_addr;
+        if (sec_vma < vma && vma < sec_vma + secs[i].length) {
+            return std::optional<uint32_t>(i);
+        }
+    }
+    return std::nullopt;
+}
+
 std::ostream& Rel::printRaw(std::ostream& os, bool print_relocs, bool p_hdr, bool p_secs, bool p_imps) const {
     if (p_hdr)
         os << hdr;

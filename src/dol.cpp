@@ -116,6 +116,24 @@ Dol::~Dol() {
         free(file);
 }
 
+std::optional<uint32_t> Dol::getSectionIdxByName(const std::string& name) {
+    for (uint32_t i = 0; i < secs.size(); i++) {
+        if (name == secs[i].name) {
+            return std::optional<uint32_t>(i);
+        }
+    }
+    return std::nullopt;
+}
+
+std::optional<uint32_t> Dol::getSectionIdxContainingAddress(uint32_t vma) {
+    for (uint32_t i = 0; i < secs.size(); i++) {
+        if (secs[i].address < vma && vma < secs[i].address + secs[i].length) {
+            return std::optional<uint32_t>(i);
+        }
+    }
+    return std::nullopt;
+}
+
 std::ostream& DolHeaderRaw::print(std::ostream& os) const {
     os << "Sections:" << "\n";
     os << WIDTH("Offset", 12) << WIDTH("Address", 12) << WIDTH("Size", 10) << "\n";

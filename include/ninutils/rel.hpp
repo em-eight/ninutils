@@ -175,8 +175,17 @@ public:
     */
     uint32_t load_addr;
     uint32_t bss_load_addr;
+
     Rel(uint8_t* rel, size_t size, std::optional<ExtraInfo> extra_info = std::nullopt);
     ~Rel();
+    std::optional<uint32_t> getSectionVma(uint32_t sectionIdx) {
+        if (load_addr == 0 || bss_load_addr) return std::nullopt; // no load information
+        const auto& sec = secs[sectionIdx];
+        uint32_t vma = sec.isBss() ? bss_load_addr : sec.offset + load_addr;
+        return std::optional<uint32_t>(vma);
+    }
+    std::optional<uint32_t> getSectionIdxByName(const std::string& name);
+    std::optional<uint32_t> getSectionIdxContainingAddress(uint32_t vma);
     std::ostream& printRaw(std::ostream& os, bool print_relocs=false, bool p_hdr=true,
         bool p_secs=false, bool p_imps=false) const;
     std::ostream& print(std::ostream& os, bool print_relocs=false, bool p_hdr=true,
