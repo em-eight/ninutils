@@ -55,15 +55,14 @@ void Dol::setSectionName(uint8_t sec, std::optional<ExtraInfo> extra_info) {
     if (secs[sec].isText) {
         sectionBaseName = DEF_TEXT_SECTION_NAME;
     } else if (secs[sec].isBss()) {
-        sectionBaseName = DEF_DATA_SECTION_NAME;
-    } else {
         sectionBaseName = DEF_BSS_SECTION_NAME;
+    } else {
+        sectionBaseName = DEF_DATA_SECTION_NAME;
     }
     if (similarSectionTypeCount == 0) {
-        secs[sec].name = secs[sec].isText ? DEF_TEXT_SECTION_NAME : DEF_DATA_SECTION_NAME;
+        secs[sec].name = sectionBaseName;
     } else {
-        secs[sec].name = (secs[sec].isText ? DEF_TEXT_SECTION_NAME : DEF_DATA_SECTION_NAME) +
-            std::to_string(similarSectionTypeCount+1);
+        secs[sec].name = sectionBaseName + std::to_string(similarSectionTypeCount+1);
     }
 }
 
