@@ -2,10 +2,10 @@
 A binutils-like C++ library/CLI introspection tool for nintendo GameCube and Wii binary formats (DOL and REL).
 
 ## Abstract
-Projects that handle DOL/REL files frequently reinvent the wheel by implementing their own tools from 
-near scratch. This project attempts to cover most generic binary manipulation needs or at least 
+Projects that handle DOL/REL files frequently reinvent the wheel by implementing their own tools from
+near scratch. This project attempts to cover most generic binary manipulation needs or at least
 provide a solid baseline for developing custom tools.
-It also offers nice CLI utilities that don't suffer from the information loss from modeling in an 
+It also offers nice CLI utilities that don't suffer from the information loss from modeling in an
 existing binary manipulation library (e.g. BFD/radare2).
 
 To achieve such thing, this project aims to:
@@ -14,16 +14,14 @@ and get a good idea on how to achieve what they want.
 - cover most common operations on DOL/REL binaries anyone would want. (please contribute issues/code
  if you know any!)
 - have a CLI that resembles the generally familiar binutils.
-- be very fast and make close to zero performance compromises. This prevents people from considering 
+- be very fast and make close to zero performance compromises. This prevents people from considering
 their own tools for performance reasons.
 
 ## Building/Installation
 ```
-mkdir build
-cd build
-cmake ..
-make
-make install
+cmake -B build
+cmake --build build -j
+cmake --install build
 ```
 You may need to adjust your PATH/LD_LIBRARY_PATH to the path of the installed executables/libraries.
 
@@ -65,7 +63,7 @@ mkw-pal     Mario Kart Wii PAL
 ## External information
 Aside from the binaries themselves, external information about the context that the binaries are loaded
 can be provided with the class `ExtraInfo`, to enable functionality that requires them.
-The library also contains presets of the objects that can be passed to the CLI tools that can 
+The library also contains presets of the objects that can be passed to the CLI tools that can
 enrich/extend their output. To add a preset for your game of interest to this library, simply add an
  `else if` statement to the ExtraInfo constructor at `src/extra_info.cpp`
 ## Documentation
@@ -78,5 +76,5 @@ Currently in progress. The header files are relatively small for now and contain
 - python bindings
 
 ## Acknowledgements
-Thanks to Seeky, terorie, riidefi, Chadderz, wiki tockdom contributors and all others that helped me 
+Thanks to Seeky, terorie, riidefi, Chadderz, wiki tockdom contributors and all others that helped me
 understand how these formats work.
