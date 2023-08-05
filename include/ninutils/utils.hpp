@@ -1,7 +1,6 @@
 
 #pragma once
 
-#include <endian.h>
 #include <cstring>
 #include <cstdint>
 #include <iomanip>
@@ -27,18 +26,18 @@ inline uint8_t readbe8(void* src) {
 inline uint16_t readbe16(void* src) {
     uint16_t num;
     memcpy(&num, src, 2);
-    return htobe16(num);
+    return __builtin_bswap16(num);
 }
 
 inline uint32_t readbe32(void* src) {
     uint32_t num;
     memcpy(&num, src, 4);
-    return htobe32(num);
+    return __builtin_bswap32(num);
 }
 
 inline uint64_t readbe64(void* src) {
     uint64_t num;
     memcpy(&num, src, 8);
-    return htobe64(num);
+    return __builtin_bswap64(num);
 }
 } // ns ninutils
