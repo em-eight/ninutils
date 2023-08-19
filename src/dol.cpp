@@ -87,8 +87,8 @@ Dol::Dol(uint8_t* dol, size_t size, std::optional<ExtraInfo> extra_info) : hdr(d
         std::sort(dolSectionIdxsInterectingBss.begin(), dolSectionIdxsInterectingBss.end(), [this](int a, int b) {
             return hdr.addresses[a] < hdr.addresses[b];
         });
-        secs.emplace_back(0, hdr.bss_address, hdr.addresses[dolSectionIdxsInterectingBss[0]], false, ".bss");
-        int count_sda= 1;
+        secs.emplace_back(0, hdr.bss_address, hdr.addresses[dolSectionIdxsInterectingBss[0]] - hdr.bss_address, false, ".bss");
+        int count_sda = 1;
         for (int idx : dolSectionIdxsInterectingBss) {
             std::string suffix = count_sda != 1 ? std::to_string(count_sda) : std::string("");
             secs.emplace_back(hdr.offsets[idx], hdr.addresses[idx], hdr.lengths[idx], false, ".sdata" + suffix);
