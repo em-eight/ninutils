@@ -4,6 +4,7 @@
 #include <cstring>
 #include <cstdint>
 #include <iomanip>
+#include <bit>
 
 #define DEC_FMT(X) std::noshowbase << std::dec << X
 #define HEX_FMT(X) std::showbase << std::hex << X
@@ -16,6 +17,17 @@
 #define NUM(X) +X // hack that prints char/uint8_t as int
 
 namespace ninutils {
+inline uint8_t be8(uint8_t x) { return x; }
+
+inline uint16_t be16(uint16_t x) {
+  if constexpr (std::endian::native != std::endian::big) return ((x & 0xff) >> 8) | (x << 8);
+  return x;
+}
+
+inline uint32_t be32(uint32_t num) {
+  if constexpr (std::endian::native != std::endian::big) return ((num & 0xff000000) >> 24) | ((num & 0x00ff0000) >> 8) | ((num & 0x0000ff00) << 8) | (num << 24);
+  return num;
+}
 
 inline uint8_t readbe8(void* src) {
     uint8_t num;
@@ -26,18 +38,12 @@ inline uint8_t readbe8(void* src) {
 inline uint16_t readbe16(void* src) {
     uint16_t num;
     memcpy(&num, src, 2);
-    return __builtin_bswap16(num);
+    return be16(num);
 }
 
 inline uint32_t readbe32(void* src) {
     uint32_t num;
     memcpy(&num, src, 4);
-    return __builtin_bswap32(num);
-}
-
-inline uint64_t readbe64(void* src) {
-    uint64_t num;
-    memcpy(&num, src, 8);
-    return __builtin_bswap64(num);
+    return be32(num);
 }
 } // ns ninutils
