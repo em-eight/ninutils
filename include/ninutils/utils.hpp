@@ -20,7 +20,7 @@ namespace ninutils {
 inline uint8_t be8(uint8_t x) { return x; }
 
 inline uint16_t be16(uint16_t x) {
-  if constexpr (std::endian::native != std::endian::big) return ((x & 0xff) >> 8) | (x << 8);
+  if constexpr (std::endian::native != std::endian::big) return ((x & 0xff00) >> 8) | (x << 8);
   return x;
 }
 
